@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
-import { AlertCircle, Clock, Plus, Pencil } from "lucide-react";
+import { AlertCircle, Clock, Plus } from "lucide-react";
+import { TimeEntryList } from "./time-entry-list";
 import type { Metadata } from "next";
 
 import { SyncCalendarButton } from "./sync-calendar-button";
@@ -60,73 +60,7 @@ export default async function TimeEntriesPage() {
           <p className="text-sm">Log time manually or sync via Google Calendar.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#e5e0d8] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#e5e0d8] bg-[#faf9f7]">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Title</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Project</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden sm:table-cell">Date/Time</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Duration</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Source</th>
-                <th className="w-12 px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry, i) => {
-                const hours = Math.floor(entry.duration_minutes / 60);
-                const mins = entry.duration_minutes % 60;
-                const project = entry.projects as { title: string } | null;
-
-                return (
-                  <tr
-                    key={entry.id}
-                    className={`hover:bg-[#faf9f7] transition-colors ${i < entries.length - 1 ? "border-b border-[#e5e0d8]" : ""}`}
-                  >
-                    <td className="px-4 py-3">
-                      <span className="text-sm font-medium text-[#1a1714]">{entry.title}</span>
-                      {entry.needs_manual_assignment && (
-                        <span className="ml-2 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">unassigned</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-500">
-                      {project?.title ?? <span className="text-gray-300 italic">none</span>}
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-sm text-gray-500 tabular-nums">
-                      {new Date(entry.start_time).toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-[#1a1714] font-medium tabular-nums">
-                      {hours > 0 ? `${hours}h ` : ""}{mins > 0 ? `${mins}m` : ""}
-                    </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        entry.source === "google_calendar"
-                          ? "bg-blue-50 text-blue-600"
-                          : "bg-gray-50 text-gray-500"
-                      }`}>
-                        {entry.source === "google_calendar" ? "Calendar" : "Manual"}
-                      </span>
-                    </td>
-                    <td className="px-2 py-3">
-                      <Link
-                        href={`/app/time-entries/${entry.id}/edit`}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#be7b3b] hover:bg-[#faf9f7] transition-colors inline-flex"
-                        title="Edit"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <TimeEntryList entries={entries as any[]} />
       )}
     </div>
   );

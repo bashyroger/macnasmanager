@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Plus, ChevronRight } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { Plus } from "lucide-react";
+import { MaterialList } from "./material-list";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Materials Library" };
@@ -44,41 +44,7 @@ export default async function MaterialsPage() {
           <p className="text-sm">Add materials or import from CSV to get started.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#e5e0d8] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#e5e0d8] bg-[#faf9f7]">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Name</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Unit</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Cost/unit</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Supplier</th>
-                <th className="px-4 py-3 w-10"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {materials.map((material, i) => (
-                <tr
-                  key={material.id}
-                  className={`hover:bg-[#faf9f7] transition-colors ${i < materials.length - 1 ? "border-b border-[#e5e0d8]" : ""}`}
-                >
-                  <td className="px-4 py-3">
-                    <Link href={`/app/materials/${material.id}`} className="font-medium text-[#1a1714] hover:text-[#be7b3b] transition-colors">
-                      {material.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-500">{material.unit}</td>
-                  <td className="px-4 py-3 text-sm text-[#1a1714] font-medium">{formatCurrency(material.cost_per_unit)}</td>
-                  <td className="px-4 py-3 hidden lg:table-cell text-sm text-gray-400">{material.supplier_name ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/app/materials/${material.id}`}>
-                      <ChevronRight className="w-4 h-4 text-gray-300 hover:text-gray-500" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MaterialList materials={materials as any[]} />
       )}
     </div>
   );

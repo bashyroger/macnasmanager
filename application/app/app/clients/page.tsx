@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus } from "lucide-react";
+import { ClientList } from "./client-list";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Clients" };
@@ -36,43 +37,7 @@ export default async function ClientsPage() {
           <p className="text-sm">Create your first client to get started.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#e5e0d8] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#e5e0d8] bg-[#faf9f7]">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Name</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Email</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Added</th>
-                <th className="px-4 py-3 w-10"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client, i) => (
-                <tr
-                  key={client.id}
-                  className={`hover:bg-[#faf9f7] transition-colors ${i < clients.length - 1 ? "border-b border-[#e5e0d8]" : ""}`}
-                >
-                  <td className="px-4 py-3">
-                    <Link href={`/app/clients/${client.id}`} className="font-medium text-[#1a1714] hover:text-[#be7b3b] transition-colors">
-                      {client.full_name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-500">
-                    {client.email ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 hidden lg:table-cell text-sm text-gray-400">
-                    {formatDate(client.created_at)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/app/clients/${client.id}`}>
-                      <ChevronRight className="w-4 h-4 text-gray-300 hover:text-gray-500" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ClientList clients={clients as any[]} />
       )}
     </div>
   );
