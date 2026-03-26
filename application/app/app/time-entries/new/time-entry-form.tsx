@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { logTimeManualEntry } from "../actions";
 
 type Project = { id: string; title: string };
 
@@ -49,21 +49,22 @@ export function TimeEntryForm({ projects }: { projects: Project[] }) {
     if (durationMinutes === null || durationMinutes <= 0) { setError("End time must be after start time."); return; }
 
     setSubmitting(true);
-    const supabase = createClient();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: dbError } = await (supabase.from("time_entries") as any).insert({
-      title: title.trim(),
-      project_id: projectId || null,
-      start_time: new Date(startTime).toISOString(),
-      end_time: new Date(endTime).toISOString(),
-      duration_minutes: durationMinutes,
-      source: "manual",
-      needs_manual_assignment: !projectId,
-    });
+    
+    try {
+      await logTimeManualEntry({
+        title: title.trim(),
+        projectId: projectId || null,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString(),
+        durationMinutes: durationMinutes,
+      });
+    } catch (err: any) {
+      setSubmitting(false);
+      setError(err.message);
+      return;
+    }
 
     setSubmitting(false);
-    if (dbError) { setError(dbError.message); return; }
     router.push("/app/time-entries");
     router.refresh();
   };

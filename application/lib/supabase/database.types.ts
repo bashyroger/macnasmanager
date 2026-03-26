@@ -86,6 +86,44 @@ export type Database = {
         }
         Relationships: []
       }
+      google_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          access_token: string | null
+          refresh_token: string
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          access_token?: string | null
+          refresh_token: string
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          access_token?: string | null
+          refresh_token?: string
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_sustainability_scores: {
         Row: {
           id: string

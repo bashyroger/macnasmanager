@@ -1,0 +1,178 @@
+import { google } from "googleapis";
+
+// Ensure environment variables are correctly loaded
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// The callback URL MUST EXACTLY match what's configured in Google Cloud Console
+const REDIRECT_URI = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/google/callback`;
+
+export function getGoogleOAuthClient() {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error("Missing Google Cloud credentials in environment variables.");
+  }
+
+  return new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URI
+  );
+}
+
+export function generateAuthUrl() {
+  const oauth2Client = getGoogleOAuthClient();
+  
+  // Generate a url that asks permissions for Google Calendar scopes
+  return oauth2Client.generateAuthUrl({
+    // 'offline' gets refresh_token
+    access_type: "offline",
+    // We strictly need calendar events to read/write time entries
+    scope: ["https://www.googleapis.com/auth/calendar.events"],
+    // Force prompt ensures we always get a refresh token during connection
+    prompt: "consent"
+  });
+}
+
+export async function createCalendarEvent(
+  refreshToken: string,
+  event: {
+    summary: string;
+    description?: string;
+    startTime: string; // ISO String
+    endTime: string;   // ISO String
+  }
+) {
+  const oauth2Client = getGoogleOAuthClient();
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+  const response = await calendar.events.insert({
+    calendarId: "primary",
+    requestBody: {
+      summary: event.summary,
+      description: event.description || "Created via Studio Macnas Manager",
+      start: { dateTime: event.startTime },
+      end: { dateTime: event.endTime },
+    },
+  });
+
+  return response.data;
+}
+export async function syncCalendarEvents(supabase: any) {
+  let syncRunId: string | null = null;
+  let recordsProcessed = 0;
+
+  try {
+    // 1. Start tracking the sync run
+    const { data: runStart } = await supabase
+      .from("sync_runs")
+      .insert({ 
+        sync_type: "google_calendar_import", 
+        status: "running", 
+        started_at: new Date().toISOString(), 
+        summary_json: {} 
+      })
+      .select("id")
+      .single();
+    
+    syncRunId = runStart?.id ?? null;
+
+    // 2. Fetch the admin user's Google Token
+    // In MVP, we just grab the first token we find since it's a single-tenant admin app.
+    const { data: tokenRecord } = await supabase
+      .from("google_tokens")
+      .select("refresh_token")
+      .limit(1)
+      .single();
+
+    if (!tokenRecord?.refresh_token) {
+      throw new Error("No Google Calendar connected. Skipping sync.");
+    }
+
+    const oauth2Client = getGoogleOAuthClient();
+    oauth2Client.setCredentials({ refresh_token: tokenRecord.refresh_token });
+    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+    // 3. Determine time window
+    // We fetch events modified in the last 24 hours for manual sync to be more thorough,
+    // but the cron can stay frequent. Let's stick to 1 hour or make it a param? 
+    // Let's do 24 hours for manual safety.
+    const lookbackHours = 24;
+    const sinceTime = new Date(Date.now() - lookbackHours * 60 * 60 * 1000).toISOString();
+
+    const response = await calendar.events.list({
+      calendarId: "primary",
+      updatedMin: sinceTime,
+      singleEvents: true,
+      orderBy: "startTime",
+    });
+
+    const events = response.data.items || [];
+    
+    // Fetch all active projects to match against
+    const { data: projects } = await supabase.from("projects").select("id, title");
+
+    // 4. Upsert events into time_entries
+    for (const event of events) {
+      if (!event.start?.dateTime || !event.end?.dateTime) continue; // Skip all-day events
+
+      const durationMs = new Date(event.end.dateTime).getTime() - new Date(event.start.dateTime).getTime();
+      const durationMinutes = Math.ceil(durationMs / 60000);
+
+      // Simple Title Matching: e.g. "Sabine bag - Pattern Drafting"
+      let assignedProjectId: string | null = null;
+      let needsManualAssignment = true;
+
+      if (projects && event.summary) {
+        const matchingProject = projects.find((p: any) => 
+          event.summary?.toLowerCase().includes(p.title.toLowerCase())
+        );
+        if (matchingProject) {
+          assignedProjectId = matchingProject.id;
+          needsManualAssignment = false;
+        }
+      }
+
+      const upsertPayload = {
+        title: event.summary || "Untitled Calendar Event",
+        start_time: event.start.dateTime,
+        end_time: event.end.dateTime,
+        duration_minutes: durationMinutes,
+        source: "google_calendar",
+        project_id: assignedProjectId,
+        needs_manual_assignment: needsManualAssignment,
+        google_event_id: event.id // Our unique key
+      };
+
+      await supabase
+        .from("time_entries")
+        .upsert(upsertPayload, { onConflict: "google_event_id" });
+
+      recordsProcessed++;
+    }
+
+    // Mark as success
+    if (syncRunId) {
+      await supabase.from("sync_runs").update({
+        status: "success",
+        summary_json: { records_processed: recordsProcessed },
+        finished_at: new Date().toISOString()
+      }).eq("id", syncRunId);
+    }
+
+    return { success: true, recordsProcessed };
+  } catch (error: any) {
+    console.error("Calendar Sync Error:", error);
+
+    // Mark as failure
+    if (syncRunId) {
+      await supabase.from("sync_runs").update({
+        status: "failed",
+        summary_json: { error_details: error.message || String(error) },
+        finished_at: new Date().toISOString()
+      }).eq("id", syncRunId);
+    }
+
+    throw error;
+  }
+}
