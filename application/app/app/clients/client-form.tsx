@@ -69,55 +69,60 @@ export function ClientForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-xl">
-      <Field label="Full name *" error={errors.full_name?.message}>
+      <Field id="full_name" label="Full name *" error={errors.full_name?.message}>
         <input
+          id="full_name"
           {...register("full_name")}
           className={inputClass(!!errors.full_name)}
           placeholder="e.g. Jane Smith"
+          aria-invalid={!!errors.full_name}
+          aria-required="true"
         />
       </Field>
 
-      <Field label="Email" error={errors.email?.message}>
+      <Field id="email" label="Email" error={errors.email?.message}>
         <input
+          id="email"
           {...register("email")}
           type="email"
           className={inputClass(!!errors.email)}
           placeholder="jane@example.com"
+          aria-invalid={!!errors.email}
         />
       </Field>
 
-      <Field label="Phone">
-        <input {...register("phone")} className={inputClass(false)} placeholder="+353 87 000 0000" />
+      <Field id="phone" label="Phone">
+        <input id="phone" {...register("phone")} className={inputClass(false)} placeholder="+353 87 000 0000" />
       </Field>
 
-      <Field label="Instagram handle">
-        <input {...register("instagram_handle")} className={inputClass(false)} placeholder="@handle" />
+      <Field id="instagram_handle" label="Instagram handle">
+        <input id="instagram_handle" {...register("instagram_handle")} className={inputClass(false)} placeholder="@handle" />
       </Field>
 
-      <Field label="Preferences / style notes">
-        <textarea {...register("preferences")} rows={3} className={inputClass(false)} placeholder="e.g. prefers earthy tones, no metal hardware" />
+      <Field id="preferences" label="Preferences / style notes">
+        <textarea id="preferences" {...register("preferences")} rows={3} className={inputClass(false)} placeholder="e.g. prefers earthy tones, no metal hardware" />
       </Field>
 
-      <Field label="Internal notes">
-        <textarea {...register("notes")} rows={3} className={inputClass(false)} placeholder="Private notes about this client" />
+      <Field id="notes" label="Internal notes">
+        <textarea id="notes" {...register("notes")} rows={3} className={inputClass(false)} placeholder="Private notes about this client" />
       </Field>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        <p role="alert" className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
       )}
 
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors"
+          className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors focus:ring-2 focus:ring-[#be7b3b] focus:ring-offset-2"
         >
           {isSubmitting ? "Saving…" : isEdit ? "Save changes" : "Create client"}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm font-medium text-gray-600 hover:bg-[#faf9f7] transition-colors"
+          className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm font-medium text-gray-600 hover:bg-[#faf9f7] transition-colors focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
         >
           Cancel
         </button>
@@ -126,12 +131,19 @@ export function ClientForm({
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
+  const errorId = `${id}-error`;
   return (
     <div>
-      <label className="block text-sm font-medium text-[#1a1714] mb-1.5">{label}</label>
-      {children}
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      <label htmlFor={id} className="block text-sm font-medium text-[#1a1714] mb-1.5">{label}</label>
+      <div className="relative">
+        {children}
+      </div>
+      {error && (
+        <p id={errorId} className="text-xs text-red-600 mt-1" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

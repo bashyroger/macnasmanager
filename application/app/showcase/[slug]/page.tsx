@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -48,26 +49,29 @@ export default async function ShowcaseDetailPage({ params }: Props) {
   }> | null;
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-16">
+    <main className="max-w-4xl mx-auto px-6 py-16" aria-labelledby="project-title">
       {/* Breadcrumb */}
-      <p className="text-sm text-gray-400 mb-8">
+      <nav className="text-sm text-gray-400 mb-8" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-[#be7b3b]">Studio Macnas</Link>
         {" / "}
         <Link href="/showcase" className="hover:text-[#be7b3b]">Showcase</Link>
         {" / "}
-        {project.public_title}
-      </p>
+        <span className="text-[#1a1714]" aria-current="page">{project.public_title}</span>
+      </nav>
 
       {/* Hero */}
-      <div className="mb-10">
+      <div className="mb-10 relative aspect-[16/9] bg-[#f0ebe4] rounded-2xl overflow-hidden">
         {project.hero_image_path ? (
-          <img
+          <Image
             src={`https://fsbpxifvpjtkrltfizmv.supabase.co/storage/v1/object/public/project-public/${project.hero_image_path}`}
-            alt={project.public_title ?? "Project"}
-            className="w-full aspect-[16/9] object-cover rounded-2xl"
+            alt={project.public_title ?? "Project Hero Image"}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 1024px) 100vw, 1024px"
           />
         ) : (
-          <div className="w-full aspect-[16/9] bg-[#f0ebe4] rounded-2xl flex items-center justify-center text-6xl">
+          <div className="w-full h-full flex items-center justify-center text-6xl" aria-hidden="true">
             👜
           </div>
         )}
@@ -76,7 +80,7 @@ export default async function ShowcaseDetailPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-[#1a1714] mb-3">{project.public_title}</h1>
+          <h1 id="project-title" className="text-3xl font-semibold text-[#1a1714] mb-3">{project.public_title}</h1>
           <p className="text-gray-500 text-lg leading-relaxed">{project.public_description}</p>
         </div>
         {project.product_tier_label && (

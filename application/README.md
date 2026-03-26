@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Studio Macnas Platform
 
-## Getting Started
+Bespoke handcrafted bags management and public showcase platform.
 
-First, run the development server:
+## 🚀 Features
+
+- **Product Passport**: Public-facing showcase for handcrafted products with sustainability and financial transparency.
+- **Project Management**: Internal dashboard for tracking client projects, from inquiry to delivery.
+- **Resource Management**: Comprehensive tracking of materials, costs, and labor time.
+- **Deterministic Math**: Centralized business logic for financial calculations, sustainability scoring, and product tiering.
+- **Calendar Integration**: Automatic time entry syncing from Google Calendar via project short codes.
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Database/Auth**: Supabase
+- **Language**: TypeScript
+- **Styling**: Vanilla CSS (Premium Aesthetics)
+- **Testing**: Vitest (Business Logic)
+- **CI/CD**: GitHub Actions
+
+## 🚦 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- Supabase account & project
+
+### Environment Variables
+
+Create a `.env.local` file in the `application` directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Google Calendar Integration (Optional for local dev)
+GOOGLE_CLIENT_ID=your_id
+GOOGLE_CLIENT_SECRET=your_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
+```
+
+### Installation
+
+```bash
+cd application
+npm install
+```
+
+### Database Setup
+
+1. Run the migrations in the `supabase/migrations` folder against your project.
+2. Ensure the `v_project_public_showcase` view is created.
+
+### Running Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧪 Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The platform uses `vitest` for deterministic business logic validation.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx vitest run
+```
 
-## Learn More
+Critical logic is centralized in `lib/business-logic.ts`.
 
-To learn more about Next.js, take a look at the following resources:
+## 🔒 Security & Hardening
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **UTF-8 Enforcement**: All files must be UTF-8 encoded.
+- **ARIA/a11y**: All core forms and public routes are optimized for screen readers.
+- **Performance**: Image optimization via `next/image` with Supabase Storage integration.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Internal Studio Macnas Property.

@@ -92,17 +92,25 @@ export function TimeEntryEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
-      <Field label="Title *">
+      <Field id="entry-title" label="Title *">
         <input
+          id="entry-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass(!title && !!error)}
           placeholder="e.g. Pattern drafting — Sabine bag"
+          aria-invalid={!title && !!error}
+          aria-required="true"
         />
       </Field>
 
-      <Field label="Project">
-        <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className={inputClass(false)}>
+      <Field id="entry-project" label="Project">
+        <select 
+          id="entry-project" 
+          value={projectId} 
+          onChange={(e) => setProjectId(e.target.value)} 
+          className={inputClass(false)}
+        >
           <option value="">No project (unassigned queue)</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>{p.title}</option>
@@ -111,45 +119,49 @@ export function TimeEntryEditForm({
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Start time *">
+        <Field id="entry-start" label="Start time *">
           <input
+            id="entry-start"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             className={inputClass(false)}
+            aria-required="true"
           />
         </Field>
-        <Field label="End time *">
+        <Field id="entry-end" label="End time *">
           <input
+            id="entry-end"
             type="datetime-local"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             className={inputClass(false)}
+            aria-required="true"
           />
         </Field>
       </div>
 
       {durationMinutes !== null && (
-        <div className="text-sm bg-[#faf9f7] rounded-lg px-4 py-2.5 flex justify-between">
+        <div className="text-sm bg-[#faf9f7] rounded-lg px-4 py-2.5 flex justify-between" role="status" aria-live="polite">
           <span className="text-gray-500">Duration</span>
           <span className="font-semibold text-[#1a1714] tabular-nums">{formatDuration(durationMinutes)}</span>
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
 
       <div className="flex items-center gap-3 pt-2">
         <button
           type="submit"
           disabled={submitting}
-          className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors"
+          className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors focus:ring-2 focus:ring-[#be7b3b] focus:ring-offset-2"
         >
           {submitting ? "Saving…" : "Save changes"}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm font-medium text-gray-600 hover:bg-[#faf9f7] transition-colors"
+          className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm font-medium text-gray-600 hover:bg-[#faf9f7] transition-colors focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
         >
           Cancel
         </button>
@@ -157,7 +169,7 @@ export function TimeEntryEditForm({
           type="button"
           onClick={handleDelete}
           disabled={deleting}
-          className="ml-auto px-4 py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors"
+          className="ml-auto px-4 py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors focus:ring-2 focus:ring-red-200 focus:ring-offset-2"
         >
           {deleting ? "Deleting…" : "Delete entry"}
         </button>
@@ -166,10 +178,10 @@ export function TimeEntryEditForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[#1a1714] mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-[#1a1714] mb-1.5">{label}</label>
       {children}
     </div>
   );

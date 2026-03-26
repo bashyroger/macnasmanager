@@ -21,7 +21,7 @@ export default async function EditTimeEntryPage({ params }: Props) {
   const [{ data: entry }, { data: projects }] = await Promise.all([
     supabase
       .from("time_entries")
-      .select("id, title, project_id, start_time, end_time, duration_minutes, google_event_id")
+      .select("id, title, project_id, start_time, end_time, duration_minutes, external_event_id")
       .eq("id", id)
       .single(),
     supabase
@@ -41,7 +41,7 @@ export default async function EditTimeEntryPage({ params }: Props) {
         </p>
         <h1 className="text-2xl font-semibold text-[#1a1714]">Edit time entry</h1>
       </div>
-      <TimeEntryEditForm entry={entry} projects={projects ?? []} />
+      <TimeEntryEditForm entry={entry as any} projects={projects ?? []} />
     </div>
   );
 }

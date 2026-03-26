@@ -66,16 +66,19 @@ export function AddMaterialForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4">
-      <h2 className="text-sm font-semibold text-[#1a1714]">Add material</h2>
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#e5e0d8] p-5 space-y-4" aria-labelledby="add-material-title">
+      <h2 id="add-material-title" className="text-sm font-semibold text-[#1a1714]">Add material</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Material</label>
+          <label htmlFor="material-select" className="block text-xs font-medium text-gray-500 mb-1.5">Material</label>
           <select
+            id="material-select"
             value={materialId}
             onChange={(e) => setMaterialId(e.target.value)}
             className={inputClass(!materialId && !!error)}
+            aria-invalid={!materialId && !!error}
+            aria-required="true"
           >
             <option value="">Select a material…</option>
             {materials.map((m) => (
@@ -87,10 +90,11 @@ export function AddMaterialForm({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">
+          <label htmlFor="quantity-input" className="block text-xs font-medium text-gray-500 mb-1.5">
             Quantity {selected ? `(${selected.unit})` : ""}
           </label>
           <input
+            id="quantity-input"
             type="number"
             step="0.0001"
             min="0"
@@ -98,20 +102,23 @@ export function AddMaterialForm({
             onChange={(e) => setQuantity(e.target.value)}
             className={inputClass(!quantity && !!error)}
             placeholder="0"
+            aria-invalid={!quantity && !!error}
+            aria-required="true"
           />
         </div>
       </div>
 
       {computedCost !== null && (
-        <div className="text-sm text-[#1a1714] bg-[#faf9f7] rounded-lg px-4 py-2.5 flex justify-between">
+        <div className="text-sm text-[#1a1714] bg-[#faf9f7] rounded-lg px-4 py-2.5 flex justify-between" role="status" aria-live="polite">
           <span className="text-gray-500">Computed cost</span>
           <span className="font-semibold">€{computedCost.toFixed(2)}</span>
         </div>
       )}
 
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1.5">Notes (optional)</label>
+        <label htmlFor="material-notes" className="block text-xs font-medium text-gray-500 mb-1.5">Notes (optional)</label>
         <input
+          id="material-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className={inputClass(false)}
@@ -119,12 +126,12 @@ export function AddMaterialForm({
         />
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
 
       <button
         type="submit"
         disabled={submitting}
-        className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors"
+        className="px-5 py-2.5 rounded-xl bg-[#be7b3b] text-white text-sm font-medium hover:bg-[#a86330] disabled:opacity-60 transition-colors focus:ring-2 focus:ring-[#be7b3b] focus:ring-offset-2"
       >
         {submitting ? "Adding…" : "Add to project"}
       </button>
