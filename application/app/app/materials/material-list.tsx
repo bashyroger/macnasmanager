@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table";
 
 type Material = {
   id: string;
@@ -15,6 +16,22 @@ type Material = {
 };
 
 export function MaterialList({ materials }: { materials: Material[] }) {
+  const supplierOptions = useMemo(() => {
+    const suppliers = materials
+      .map(m => m.supplier_name)
+      .filter((name): name is string => !!name);
+    return [...new Set(suppliers)].sort().map(name => ({ label: name, value: name }));
+  }, [materials]);
+
+  const filters: FilterDef<Material>[] = [
+    {
+      id: "supplier",
+      label: "Supplier",
+      options: supplierOptions,
+      filterFn: (material, value) => material.supplier_name === value,
+    },
+  ];
+
   const columns: ColumnDef<Material>[] = [
     {
       header: "Name",
@@ -64,5 +81,5 @@ export function MaterialList({ materials }: { materials: Material[] }) {
     },
   ];
 
-  return <DataTable data={materials} columns={columns} />;
+  return <DataTable data={materials} columns={columns} filters={filters} />;
 }

@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table";
 
 const statusColors: Record<string, string> = {
   inquiry: "bg-gray-100 text-gray-600",
@@ -25,6 +26,36 @@ type Project = {
 };
 
 export function ProjectList({ projects }: { projects: Project[] }) {
+  const clientOptions = useMemo(() => {
+    const clients = projects
+      .map(p => p.clients?.full_name)
+      .filter((name): name is string => !!name);
+    return [...new Set(clients)].sort().map(name => ({ label: name, value: name }));
+  }, [projects]);
+
+  const filters: FilterDef<Project>[] = [
+    {
+      id: "status",
+      label: "Status",
+      options: [
+        { label: "Inquiry", value: "inquiry" },
+        { label: "Consultation", value: "consultation" },
+        { label: "Design", value: "design" },
+        { label: "Production", value: "production" },
+        { label: "Completed", value: "completed" },
+        { label: "Delivered", value: "delivered" },
+        { label: "Archived", value: "archived" },
+      ],
+      filterFn: (project, value) => project.status === value,
+    },
+    {
+      id: "client",
+      label: "Client",
+      options: clientOptions,
+      filterFn: (project, value) => project.clients?.full_name === value,
+    },
+  ];
+
   const columns: ColumnDef<Project>[] = [
     {
       header: "Project",
@@ -72,5 +103,5 @@ export function ProjectList({ projects }: { projects: Project[] }) {
     },
   ];
 
-  return <DataTable data={projects} columns={columns} />;
+  return <DataTable data={projects} columns={columns} filters={filters} />;
 }

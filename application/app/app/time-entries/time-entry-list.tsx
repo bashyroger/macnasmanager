@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
-import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { DataTable, ColumnDef, FilterDef } from "@/components/ui/data-table";
 
 type TimeEntry = {
   id: string;
@@ -16,6 +17,45 @@ type TimeEntry = {
 };
 
 export function TimeEntryList({ entries }: { entries: TimeEntry[] }) {
+  const projectOptions = useMemo(() => {
+    const projects = entries
+      .map(e => e.projects?.title)
+      .filter((title): title is string => !!title);
+    return [...new Set(projects)].sort().map(title => ({ label: title, value: title }));
+  }, [entries]);
+
+  const filters: FilterDef<TimeEntry>[] = [
+    {
+      id: "project",
+      label: "Project",
+      options: projectOptions,
+      filterFn: (entry, value) => entry.projects?.title === value,
+    },
+    {
+      id: "time",
+      label: "Time Range",
+      options: [
+        { label: "Last 7 Days", value: "last_week" },
+        { label: "Last 30 Days", value: "last_month" },
+      ],
+      filterFn: (entry, value) => {
+        const entryDate = new Date(entry.start_time);
+        const now = new Date();
+        if (value === "last_week") {
+          const lastWeek = new Date();
+          lastWeek.setDate(now.getDate() - 7);
+          return entryDate >= lastWeek;
+        }
+        if (value === "last_month") {
+          const lastMonth = new Date();
+          lastMonth.setDate(now.getDate() - 30);
+          return entryDate >= lastMonth;
+        }
+        return true;
+      },
+    },
+  ];
+
   const columns: ColumnDef<TimeEntry>[] = [
     {
       header: "Title",
@@ -93,5 +133,5 @@ export function TimeEntryList({ entries }: { entries: TimeEntry[] }) {
     },
   ];
 
-  return <DataTable data={entries} columns={columns} />;
+  return <DataTable data={entries} columns={columns} filters={filters} />;
 }
