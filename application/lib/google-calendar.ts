@@ -58,6 +58,23 @@ export async function createCalendarEvent(
 
   return response.data;
 }
+
+export async function deleteCalendarEvent(
+  refreshToken: string,
+  eventId: string
+) {
+  const oauth2Client = getGoogleOAuthClient();
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+  await calendar.events.delete({
+    calendarId: "primary",
+    eventId: eventId,
+  });
+
+  return { success: true };
+}
 export async function syncCalendarEvents(supabase: any) {
   let syncRunId: string | null = null;
   let recordsProcessed = 0;
@@ -110,7 +127,7 @@ export async function syncCalendarEvents(supabase: any) {
     const events = response.data.items || [];
     
     // Fetch all active projects to match against
-    const { data: projects } = await supabase.from("projects").select("id, title");
+    const { data: projects } = await supabase.from("projects").select("id, title, short_code");
 
     // 4. Upsert events into time_entries
     for (const event of events) {
@@ -119,14 +136,26 @@ export async function syncCalendarEvents(supabase: any) {
       const durationMs = new Date(event.end.dateTime).getTime() - new Date(event.start.dateTime).getTime();
       const durationMinutes = Math.ceil(durationMs / 60000);
 
-      // Simple Title Matching: e.g. "Sabine bag - Pattern Drafting"
+      // Enhanced Matching: Check Title and Short Code
       let assignedProjectId: string | null = null;
       let needsManualAssignment = true;
 
       if (projects && event.summary) {
-        const matchingProject = projects.find((p: any) => 
-          event.summary?.toLowerCase().includes(p.title.toLowerCase())
-        );
+        const matchingProject = projects.find((p: any) => {
+          const summaryLower = event.summary?.toLowerCase() || "";
+          const descriptionLower = event.description?.toLowerCase() || "";
+          
+          const titleMatch = summaryLower.includes(p.title.toLowerCase()) || 
+                             descriptionLower.includes(p.title.toLowerCase());
+                             
+          const codeMatch = p.short_code && (
+                             summaryLower.includes(p.short_code.toLowerCase()) || 
+                             descriptionLower.includes(p.short_code.toLowerCase())
+                           );
+                           
+          return titleMatch || codeMatch;
+        });
+        
         if (matchingProject) {
           assignedProjectId = matchingProject.id;
           needsManualAssignment = false;

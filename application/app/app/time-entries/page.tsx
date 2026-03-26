@@ -66,6 +66,7 @@ export default async function TimeEntriesPage() {
               <tr className="border-b border-[#e5e0d8] bg-[#faf9f7]">
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Title</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Project</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden sm:table-cell">Date/Time</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Duration</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Source</th>
                 <th className="w-12 px-4 py-3"></th>
@@ -90,6 +91,14 @@ export default async function TimeEntriesPage() {
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-500">
                       {project?.title ?? <span className="text-gray-300 italic">none</span>}
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell text-sm text-gray-500 tabular-nums">
+                      {new Date(entry.start_time).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#1a1714] font-medium tabular-nums">
                       {hours > 0 ? `${hours}h ` : ""}{mins > 0 ? `${mins}m` : ""}

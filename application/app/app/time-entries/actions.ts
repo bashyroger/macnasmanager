@@ -61,12 +61,19 @@ export async function logTimeManualEntry(payload: LogTimePayload) {
         }
       }
 
-      await createCalendarEvent(tokens.refresh_token, {
+      const calEvent = await createCalendarEvent(tokens.refresh_token, {
         summary: eventTitle,
         startTime: payload.startTime,
         endTime: payload.endTime,
         description: `Source: Studio Macnas Dashboard\nTime Entry ID: ${entry.id}`,
       });
+
+      if (calEvent.id) {
+        await supabase
+          .from("time_entries")
+          .update({ google_event_id: calEvent.id })
+          .eq("id", entry.id);
+      }
       
     } catch (calError: any) {
       console.error("Failed to push event to Google Calendar:", calError);
@@ -90,4 +97,41 @@ export async function triggerManualCalendarSync() {
     console.error("Manual sync failed:", error);
     throw new Error(error.message || "Manual sync failed");
   }
+}
+export async function deleteTimeEntry(id: string) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("Not logged in");
+
+  // 1. Get the entry to find the google_event_id
+  const { data: entry } = await supabase
+    .from("time_entries")
+    .select("google_event_id")
+    .eq("id", id)
+    .single();
+
+  // 2. If it has a google_event_id, try to delete it from calendar
+  if (entry?.google_event_id) {
+    const { data: tokens } = await supabase
+      .from("google_tokens")
+      .select("refresh_token")
+      .eq("user_id", userData.user.id)
+      .single();
+
+    if (tokens?.refresh_token) {
+      try {
+        const { deleteCalendarEvent } = await import("@/lib/google-calendar");
+        await deleteCalendarEvent(tokens.refresh_token, entry.google_event_id);
+      } catch (calError) {
+        console.error("Failed to delete event from Google Calendar:", calError);
+        // We continue with local delete even if calendar delete fails (e.g. event already gone)
+      }
+    }
+  }
+
+  // 3. Delete from Supabase
+  const { error: dbError } = await supabase.from("time_entries").delete().eq("id", id);
+  if (dbError) throw new Error(dbError.message);
+
+  return { success: true };
 }

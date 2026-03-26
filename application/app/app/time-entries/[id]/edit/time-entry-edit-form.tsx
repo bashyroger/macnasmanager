@@ -78,13 +78,16 @@ export function TimeEntryEditForm({
   const handleDelete = async () => {
     if (!confirm("Delete this time entry? This cannot be undone.")) return;
     setDeleting(true);
-    const supabase = createClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: dbError } = await (supabase.from("time_entries") as any).delete().eq("id", entry.id);
-    setDeleting(false);
-    if (dbError) { setError(dbError.message); return; }
-    router.push("/app/time-entries");
-    router.refresh();
+    try {
+      const { deleteTimeEntry } = await import("../../actions");
+      await deleteTimeEntry(entry.id);
+      router.push("/app/time-entries");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Failed to delete entry");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (

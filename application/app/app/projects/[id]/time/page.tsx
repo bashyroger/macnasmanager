@@ -92,21 +92,27 @@ export default async function ProjectTimePage({ params }: Props) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#e5e0d8] bg-[#faf9f7]">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Title</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Date</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Duration</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Source</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 font-medium">Title</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell font-medium">Date/Time</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 font-medium">Duration</th>
+                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell font-medium">Source</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry, i) => {
                 const h = Math.floor(entry.duration_minutes / 60);
                 const m = entry.duration_minutes % 60;
-                const date = new Date(entry.start_time).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                const dateTime = new Date(entry.start_time).toLocaleString("en-GB", { 
+                  day: "numeric", 
+                  month: "short", 
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                });
                 return (
                   <tr key={entry.id} className={`hover:bg-[#faf9f7] transition-colors ${i < entries.length - 1 ? "border-b border-[#e5e0d8]" : ""}`}>
                     <td className="px-4 py-3 text-sm font-medium text-[#1a1714]">{entry.title}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{date}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell tabular-nums">{dateTime}</td>
                     <td className="px-4 py-3 text-sm text-[#1a1714] font-medium tabular-nums">{h > 0 ? `${h}h ` : ""}{m > 0 ? `${m}m` : ""}</td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
