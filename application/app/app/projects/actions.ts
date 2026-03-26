@@ -66,7 +66,7 @@ export async function saveProject(projectId: string | undefined, payload: any) {
       // 2. Tiers
       const tier = await evaluateProductTier(finances.total_cost ?? 0, finances.labor_minutes ?? 0);
       let tierIdToAssign = null;
-      if (tier) {
+      if (tier && fSnap) {
         tierIdToAssign = tier.id;
         // Update financial snapshot with the tier
         await supabase.from("project_financial_snapshots").update({ product_tier_id: tier.id }).eq("id", fSnap.id);

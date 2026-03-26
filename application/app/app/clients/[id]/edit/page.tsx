@@ -26,7 +26,17 @@ export default async function EditClientPage({ params }: Props) {
         <Link href={`/app/clients/${id}`} className="hover:text-[#be7b3b]">{client.full_name}</Link> / Edit
       </p>
       <h1 className="text-2xl font-semibold text-[#1a1714] mb-8">Edit client</h1>
-      <ClientForm clientId={id} defaultValues={client} />
+      <ClientForm 
+        clientId={id} 
+        defaultValues={{
+          ...client,
+          email: client.email ?? undefined,
+          phone: client.phone ?? undefined,
+          instagram_handle: client.instagram_handle ?? undefined,
+          preferences: client.preferences ?? undefined,
+          notes: client.notes ?? undefined,
+        }} 
+      />
     </div>
   );
 }
