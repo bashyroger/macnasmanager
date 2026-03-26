@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Unassigned Time Entries" };
 export default async function UnassignedTimeEntriesPage() {
   const supabase = await createClient();
 
-  const [{ data: entries }, { data: projects }] = await Promise.all([
+  const [{ data: responseEntries }, { data: projects }] = await Promise.all([
     supabase
       .from("time_entries")
       .select("id, title, start_time, duration_minutes, source")
@@ -22,6 +22,8 @@ export default async function UnassignedTimeEntriesPage() {
       .not("status", "eq", "archived")
       .order("title"),
   ]);
+
+  const entries = responseEntries as any[] | null;
 
   return (
     <div>

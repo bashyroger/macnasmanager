@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { slugify } from "@/lib/utils";
+import { saveProject } from "./actions";
 
 const PROJECT_STATUSES = ["inquiry", "consultation", "design", "production", "completed", "delivered", "archived"] as const;
 
@@ -76,19 +77,14 @@ export function ProjectForm({
       private_notes: values.private_notes || null,
     };
 
-    let result;
-    if (isEdit) {
-      result = await supabase.from("projects").update(payload).eq("id", projectId);
-    } else {
-      result = await supabase.from("projects").insert(payload).select("id").single();
-    }
+    const result = await saveProject(projectId, payload);
 
     if (result.error) {
-      setError(result.error.message);
+      setError(result.error);
       return;
     }
 
-    const targetId = isEdit ? projectId : (result.data as { id: string }).id;
+    const targetId = result.targetId;
     router.push(`/app/projects/${targetId}`);
     router.refresh();
   };

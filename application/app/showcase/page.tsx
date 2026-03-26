@@ -9,10 +9,11 @@ export const metadata: Metadata = {
 
 export default async function ShowcasePage() {
   const supabase = await createClient();
-  const { data: projects } = await supabase
+  const response = await supabase
     .from("v_project_public_showcase")
     .select("*")
     .order("published_at", { ascending: false });
+  const projects = response.data as any[] | null;
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-16">

@@ -33,6 +33,8 @@ const schema = z.object({
   strength_rating: optionalInt(z.number().min(1).max(10)),
   durability_rating: optionalInt(z.number().min(1).max(10)),
   bendability_rating: optionalInt(z.number().min(1).max(10)),
+  // Sustainability scores
+  scores: z.record(z.string(), z.preprocess((v) => (v === "" || v === undefined ? undefined : Number(v)), z.number().min(0).max(100))).optional(),
 });
 
 // z.input = what the form inputs hold (strings from HTML)
@@ -43,9 +45,13 @@ type FormOutput = z.output<typeof schema>;
 export function MaterialForm({
   defaultValues,
   materialId,
+  activeAxes = [],
+  initialScores = {},
 }: {
   defaultValues?: Partial<FormInput>;
   materialId?: string;
+  activeAxes?: { id: string; name: string; description: string | null }[];
+  initialScores?: Record<string, number>;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +63,7 @@ export function MaterialForm({
     formState: { errors, isSubmitting },
   } = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues ?? {},
+    defaultValues: { ...defaultValues, scores: initialScores },
   });
 
   const onSubmit = async (values: FormOutput) => {
@@ -86,15 +92,35 @@ export function MaterialForm({
     let result;
     if (isEdit) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      result = await supabase.from("materials").update(payload as any).eq("id", materialId);
+      result = await supabase.from("materials").update(payload as any).eq("id", materialId).select("id").single();
     } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      result = await supabase.from("materials").insert(payload as any);
+      result = await supabase.from("materials").insert(payload as any).select("id").single();
     }
 
     if (result.error) {
       setError(result.error.message);
       return;
+    }
+
+    const savedMaterialId = result.data?.id;
+    if (savedMaterialId && values.scores) {
+      // Delete existing scores
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("material_sustainability_scores") as any).delete().eq("material_id", savedMaterialId);
+      
+      const scoreInserts = Object.entries(values.scores)
+        .filter(([_, score]) => score !== undefined && score !== null)
+        .map(([axisId, score]) => ({
+          material_id: savedMaterialId,
+          sustainability_axis_id: axisId,
+          score: score,
+        }));
+        
+      if (scoreInserts.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from("material_sustainability_scores") as any).insert(scoreInserts);
+      }
     }
 
     router.push("/app/materials");
@@ -190,6 +216,26 @@ export function MaterialForm({
           </Field>
         </div>
       </section>
+
+      {activeAxes.length > 0 && (
+        <>
+          <div className="border-t border-[#e5e0d8]" />
+          <section>
+            <h2 className="text-sm font-semibold text-[#1a1714] mb-1 uppercase tracking-wide">Sustainability Scores</h2>
+            <p className="text-xs text-gray-400 mb-4">Score 0–100 per axis. Missing scores may block project publishing.</p>
+            <div className="grid grid-cols-2 gap-4">
+              {activeAxes.map((axis) => (
+                <Field key={axis.id} label={axis.name} error={errors.scores?.[axis.id]?.message}>
+                  <div className="flex flex-col gap-1">
+                    <input type="number" step="0.1" min={0} max={100} {...register(`scores.${axis.id}`)} className={inputClass(!!errors.scores?.[axis.id])} placeholder="0–100" />
+                    {axis.description && <span className="text-xs text-gray-400">{axis.description}</span>}
+                  </div>
+                </Field>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>

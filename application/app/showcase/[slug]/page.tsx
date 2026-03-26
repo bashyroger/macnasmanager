@@ -8,11 +8,12 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data } = await supabase
+  const response = await supabase
     .from("v_project_public_showcase")
     .select("public_title, public_description")
     .eq("slug", slug)
     .single();
+  const data = response.data as any | null;
 
   if (!data) return { title: "Project Not Found" };
 
@@ -31,11 +32,12 @@ export default async function ShowcaseDetailPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: project } = await supabase
+  const response = await supabase
     .from("v_project_public_showcase")
     .select("*")
     .eq("slug", slug)
     .single();
+  const project = response.data as any | null;
 
   if (!project) notFound();
 

@@ -51,7 +51,8 @@ export function TimeEntryForm({ projects }: { projects: Project[] }) {
     setSubmitting(true);
     const supabase = createClient();
 
-    const { error: dbError } = await supabase.from("time_entries").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: dbError } = await (supabase.from("time_entries") as any).insert({
       title: title.trim(),
       project_id: projectId || null,
       start_time: new Date(startTime).toISOString(),

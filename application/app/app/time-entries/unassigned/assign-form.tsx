@@ -28,8 +28,8 @@ export function AssignForm({
     setError(null);
     setSubmitting(true);
     const supabase = createClient();
-    const { error: dbError } = await supabase
-      .from("time_entries")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: dbError } = await (supabase.from("time_entries") as any)
       .update({ project_id: projectId, needs_manual_assignment: false })
       .eq("id", entryId);
     setSubmitting(false);

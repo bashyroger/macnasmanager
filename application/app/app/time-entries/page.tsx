@@ -8,11 +8,12 @@ export const metadata: Metadata = { title: "Time Entries" };
 
 export default async function TimeEntriesPage() {
   const supabase = await createClient();
-  const { data: entries } = await supabase
+  const response = await supabase
     .from("time_entries")
     .select("id, title, start_time, end_time, duration_minutes, source, needs_manual_assignment, projects(title)")
     .order("start_time", { ascending: false })
     .limit(100);
+  const entries = response.data as any[] | null;
 
   const { count: unassignedCount } = await supabase
     .from("time_entries")
