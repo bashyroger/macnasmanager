@@ -7,10 +7,13 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: project }, { data: clients }] = await Promise.all([
+  const [pResult, cResult] = await Promise.all([
     supabase.from("projects").select("*").eq("id", id).single(),
     supabase.from("clients").select("id, full_name").order("full_name"),
   ]);
+
+  const project = pResult.data as any;
+  const clients = cResult.data;
 
   if (!project) notFound();
 
@@ -39,6 +42,9 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
             target_delivery_date: project.target_delivery_date ?? undefined,
             overhead_amount: project.overhead_amount ?? 0,
             private_notes: project.private_notes ?? undefined,
+            public_title: project.public_title ?? undefined,
+            public_description: project.public_description ?? undefined,
+            hero_image_path: project.hero_image_path ?? undefined,
           }}
         />
       </div>

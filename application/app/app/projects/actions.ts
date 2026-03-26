@@ -103,3 +103,13 @@ export async function saveProject(projectId: string | undefined, payload: any) {
 
   return { targetId };
 }
+
+export async function toggleProjectPublish(projectId: string, isPublished: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("projects").update({ 
+    publish_enabled: isPublished,
+    published_at: isPublished ? (new Date()).toISOString() : null
+  }).eq("id", projectId);
+  if (error) return { error: error.message };
+  return { success: true };
+}

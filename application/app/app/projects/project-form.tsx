@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,9 @@ const schema = z.object({
   target_delivery_date: z.string().optional(),
   overhead_amount: z.coerce.number().min(0).optional().or(z.literal("")),
   private_notes: z.string().optional(),
+  public_title: z.string().optional(),
+  public_description: z.string().optional(),
+  hero_image_path: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -50,6 +53,7 @@ export function ProjectForm({
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    // @ts-ignore
     resolver: zodResolver(schema),
     defaultValues: {
       status: "inquiry",
@@ -61,7 +65,7 @@ export function ProjectForm({
 
   const titleValue = watch("title");
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit: SubmitHandler<FormValues> = async (values) => {
     setError(null);
     const supabase = createClient();
     const payload = {
@@ -75,6 +79,9 @@ export function ProjectForm({
       target_delivery_date: values.target_delivery_date || null,
       overhead_amount: Number(values.overhead_amount ?? 0),
       private_notes: values.private_notes || null,
+      public_title: values.public_title || null,
+      public_description: values.public_description || null,
+      hero_image_path: values.hero_image_path || null,
     };
 
     const result = await saveProject(projectId, payload);
@@ -90,7 +97,7 @@ export function ProjectForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-xl">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-5 max-w-xl">
       <Field label="Client *" error={errors.client_id?.message}>
         <select {...register("client_id")} className={inputClass(!!errors.client_id)}>
           <option value="">Select a client…</option>
@@ -151,6 +158,24 @@ export function ProjectForm({
       <Field label="Private notes">
         <textarea {...register("private_notes")} rows={3} className={inputClass(false)} placeholder="Internal notes — never shown publicly" />
       </Field>
+
+      <div className="pt-4 border-t border-[#e5e0d8] mt-6 mb-2">
+        <h3 className="text-sm font-semibold text-[#1a1714] mb-4">Public showcase data</h3>
+        <div className="space-y-5">
+          <Field label="Public title" error={errors.public_title?.message}>
+            <input {...register("public_title")} className={inputClass(false)} placeholder="e.g. Weekend Tote (if different from internal)" />
+          </Field>
+
+          <Field label="Public description" error={errors.public_description?.message}>
+            <textarea {...register("public_description")} rows={3} className={inputClass(false)} placeholder="Story of this project..." />
+          </Field>
+
+          <Field label="Hero image path" error={errors.hero_image_path?.message}>
+            <input {...register("hero_image_path")} className={inputClass(false)} placeholder="/images/projects/tote.jpg" />
+            <p className="text-xs text-gray-400 mt-1">Temporary text field for MVP image binding.</p>
+          </Field>
+        </div>
+      </div>
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>

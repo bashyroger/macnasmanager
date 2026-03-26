@@ -13,7 +13,7 @@ export default async function ReportsPage() {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: weekEntries }, { data: monthEntries }, { data: projectSummary }] = await Promise.all([
+  const [wRes, mRes, pRes] = await Promise.all([
     supabase
       .from("time_entries")
       .select("duration_minutes, projects(title)")
@@ -29,6 +29,10 @@ export default async function ReportsPage() {
       .in("status", ["design", "production", "consultation"])
       .order("title"),
   ]);
+
+  const weekEntries = wRes.data as any[] | null;
+  const monthEntries = mRes.data as any[] | null;
+  const projectSummary = pRes.data as any[] | null;
 
   const weekMinutes = (weekEntries ?? []).reduce((s, e) => s + e.duration_minutes, 0);
   const monthMinutes = (monthEntries ?? []).reduce((s, e) => s + e.duration_minutes, 0);
