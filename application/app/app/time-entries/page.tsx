@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { AlertCircle, Clock, Plus } from "lucide-react";
+import { AlertCircle, Clock, Plus, Pencil } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Time Entries" };
@@ -62,6 +62,7 @@ export default async function TimeEntriesPage() {
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Project</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Duration</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Source</th>
+                <th className="w-12 px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -95,6 +96,15 @@ export default async function TimeEntriesPage() {
                       }`}>
                         {entry.source === "google_calendar" ? "Calendar" : "Manual"}
                       </span>
+                    </td>
+                    <td className="px-2 py-3">
+                      <Link
+                        href={`/app/time-entries/${entry.id}/edit`}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#be7b3b] hover:bg-[#faf9f7] transition-colors inline-flex"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Link>
                     </td>
                   </tr>
                 );

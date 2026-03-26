@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { AddMaterialForm } from "@/app/app/projects/[id]/materials/add-material-form";
+import { RemoveMaterialButton } from "@/app/app/projects/[id]/materials/remove-material-button";
 import { formatCurrency } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -94,6 +95,7 @@ export default async function ProjectMaterialsPage({ params }: Props) {
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Unit cost (snapshot)</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">Total</th>
                 <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3 hidden lg:table-cell">Notes</th>
+                <th className="w-10 px-2 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -106,6 +108,9 @@ export default async function ProjectMaterialsPage({ params }: Props) {
                     <td className="px-4 py-3 text-sm text-gray-500 tabular-nums">{formatCurrency(Number(row.unit_cost_snapshot))}</td>
                     <td className="px-4 py-3 text-sm font-semibold text-[#1a1714] tabular-nums">{formatCurrency(Number(row.computed_material_cost))}</td>
                     <td className="px-4 py-3 text-sm text-gray-400 hidden lg:table-cell">{row.notes ?? "—"}</td>
+                    <td className="px-2 py-3">
+                      <RemoveMaterialButton id={row.id} projectId={id} />
+                    </td>
                   </tr>
                 );
               })}
