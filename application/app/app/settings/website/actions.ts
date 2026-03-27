@@ -26,6 +26,29 @@ export async function updateWebsitePage(id: string, data: { title: string; body_
   revalidatePath("/app/settings/website");
   revalidatePath("/");
   revalidatePath(`/${data.body_json.slug || ""}`);
-
   return { success: true };
+}
+
+import fs from "fs";
+import path from "path";
+
+export async function getMediaLibrary() {
+  const mediaPath = path.join(process.cwd(), "public", "cms-media", "original");
+  
+  try {
+    if (!fs.existsSync(mediaPath)) {
+      return { files: [] };
+    }
+    
+    const files = fs.readdirSync(mediaPath);
+    // Filter for common image extensions
+    const imageFiles = files.filter(file => 
+      /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file)
+    );
+    
+    return { files: imageFiles };
+  } catch (error) {
+    console.error("Error reading media library:", error);
+    return { error: "Failed to read media library" };
+  }
 }
