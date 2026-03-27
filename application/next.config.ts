@@ -1,3 +1,5 @@
+/** @type {import('next').NextConfig} */
+// Deployment trigger: Project rename to macnasmanager
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
