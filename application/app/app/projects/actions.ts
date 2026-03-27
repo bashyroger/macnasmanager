@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { computeProjectSustainability } from "@/lib/sustainability";
 import { evaluateProductTier } from "@/lib/tiers";
+import { logAction } from "@/lib/audit";
 
 export async function saveProject(projectId: string | undefined, payload: any) {
   const supabase = await createClient();
@@ -26,10 +27,12 @@ export async function saveProject(projectId: string | undefined, payload: any) {
   if (projectId) {
     const { error } = await supabase.from("projects").update(payload).eq("id", projectId);
     if (error) return { error: error.message };
+    await logAction("update", "project", projectId, { status: payload.status });
   } else {
     const { data, error } = await supabase.from("projects").insert(payload).select("id").single();
     if (error) return { error: error.message };
     targetId = data.id;
+    await logAction("create", "project", targetId, { title: payload.title });
   }
 
   if (targetId && triggerSnapshots) {
@@ -111,5 +114,8 @@ export async function toggleProjectPublish(projectId: string, isPublished: boole
     published_at: isPublished ? (new Date()).toISOString() : null
   }).eq("id", projectId);
   if (error) return { error: error.message };
+  
+  await logAction("publish_toggle", "project", projectId, { enabled: isPublished });
+  
   return { success: true };
 }

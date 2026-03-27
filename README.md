@@ -12,7 +12,7 @@ Bespoke handcrafted bags management and public showcase platform.
 
 ## 🛠 Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16.2+ (App Router)
 - **Database/Auth**: Supabase
 - **Language**: TypeScript
 - **Styling**: Vanilla CSS (Premium Aesthetics)
@@ -74,6 +74,17 @@ Critical logic is centralized in `lib/business-logic.ts`.
 - **UTF-8 Enforcement**: All files must be UTF-8 encoded.
 - **ARIA/a11y**: All core forms and public routes are optimized for screen readers.
 - **Performance**: Image optimization via `next/image` with Supabase Storage integration.
+
+## 🧠 Architectural Learnings & Standards
+
+As the project evolved from static pages to Next.js 16.2+, several core standards were established:
+
+1. **Next.js 16.2+ Paradigms**:
+   - `params` and `searchParams` in dynamic routes (e.g., `/projects/[slug]`) are Promises and must be computationally unwrapped (`await params`).
+   - Request interception uses `proxy.ts` instead of `middleware.ts`.
+   - `next/image` with `fill` strictly requires `sizes` attributes for performance and to silence Next.js warnings.
+2. **Generic Components**: To maintain a scalable dashboard, highly generic reusable components (like a universal `DataTable` with built-in sorting and filtering) are required to prevent UI duplication and ensure consistency.
+3. **Vercel Deployment Stability**: Strict adherence to import validation (especially for third-party libraries like `lucide-react`) and bulletproof TS types prevents Vercel build failures. Missing icons break CI.
 
 ## 📄 License
 

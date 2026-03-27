@@ -14,6 +14,16 @@ Windows-specific tools (like PowerShell redirections or Supabase CLI) may defaul
 - **Tooling**: Use `npm run dev` for the dashboard.
 - **Supabase**: Use the `supabase-mcp-server` for database operations. Apply migrations via `apply_migration`.
 
+## 🚀 Next.js 16.2+ & Vercel Best Practices
+- **Routing**: `params` and `searchParams` in dynamic routes are **Promises** in Next.js 15+ and must be `await`ed before accessing properties (e.g., `const { slug } = await params;`).
+- **Middleware**: Use `proxy.ts` with an `export async function proxy` instead of `middleware.ts`. If renaming the file locally, you **MUST** restart the Next.js dev server.
+- **Images**: Always provide a `sizes` prop when using `fill` on `next/image` to prevent performance warnings.
+- **Vercel Builds**: Missing icon exports (e.g., specific `lucide-react` icons) or TS errors will break the Vercel build. Always verify imports and type bindings locally.
+
+## 🏗️ Component Architecture
+- **Reusable Primitives**: Extract repetitive UI structures into highly generic, reusable components. For example, build a single `<DataTable />` component that accepts generic columns and data arrays instead of rewriting table markup, sorting, and filtering logic on every dashboard page.
+
+
 ## 📑 Project Workflow Integration
 - High-level planning must be documented in `spec-kit/10-delivery-plan.md`.
 - Active work must be tracked in the conversation-level `task.md`.

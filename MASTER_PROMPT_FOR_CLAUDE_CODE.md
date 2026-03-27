@@ -5,7 +5,10 @@ You are building a production-ready deterministic web application from the spec 
 Read every file in /spec-kit before writing code.
 
 Non-negotiable constraints:
-- Stack: Next.js + TypeScript + Node.js + Supabase + Vercel
+- Stack: Next.js 16+ + TypeScript + Node.js + Supabase + Vercel
+- Next.js 16+ rules: Use `proxy.ts` (not middleware.ts), `await params` in dynamic routes, and always include `sizes` on `fill` Images.
+- Component architecture: Maximize reusability. Build highly generic components (e.g., a single `<DataTable />` for all list views) to strictly minimize code duplication.
+- Vercel Deployment Safety: Strictly verify all imports (e.g., `lucide-react` icons) and types to ensure builds do not fail in CI.
 - Local backend development must use Supabase CLI locally
 - Single codebase for public website + private dashboard + public showcase pages
 - No separate backend service

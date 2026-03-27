@@ -8,6 +8,14 @@
   --muted: #6b7280;
   --border: #e5e0d8;
   --radius: 0.5rem;
+
+  /* Studio Macnas Public Theme */
+  --macnas-black: #171717;
+  --macnas-pure-black: #000000;
+  --macnas-yellow: #fafA00;
+  --macnas-purple: #ef5cff;
+  --macnas-text: #ffffff;
+  --macnas-muted: #a9a9a9;
 }
 
 @media (prefers-color-scheme: dark) {
