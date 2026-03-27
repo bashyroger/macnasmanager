@@ -15,12 +15,37 @@ Studio Macnas Unified Platform — Phase 1 complete. App running at `http://loca
 
 ## Database (4 migrations applied)
 
-- **14 tables**: users, clients, projects, project_images, project_notes, materials, sustainability_axes, material_sustainability_scores, project_materials, time_entries, product_tiers, project_financial_snapshots, project_sustainability_snapshots, website_pages, sync_runs, audit_logs
-- **RLS** on all tables with helper functions `is_app_user()`, `is_owner_admin()`
-- **3 views**: `v_project_public_showcase`, `v_project_financials_current`, `v_unassigned_time_entries`
-- **Seed data**: 5 sustainability axes, 3 product tiers, 3 website pages, 15 real materials
+- **14 tables**:---
 
-## Pages built
+## Final Production Deployment
+
+The project is now fully deployed and automated.
+
+- **Production URL**: [https://macnasmanager.vercel.app](https://macnasmanager.vercel.app)
+- **CI/CD Integration**: The Vercel project is now connected to [bashyroger/macnasmanager](https://github.com/bashyroger/macnasmanager). 
+- **Auto-Update**: Any push to the `master` branch will automatically trigger a new production build and update the site.
+
+### Google OAuth Configuration
+To complete the Google Calendar integration, please add the following **Authorized Redirect URI** to your Google Cloud Console project:
+- `https://macnasmanager.vercel.app/api/auth/google/callback`
+
+### Verified Functionality
+- [x] **Authentication**: Live at `/login`.
+- [x] **Authorization Check**: The dashboard strictly requires an allowlist. New Sign-Ins are automatically redirected to the `/unauthorized` landing page until added to the `public.users` table by an admin.
+- [x] **Tables**: Sorting and Filtering fully functional in production.
+- [x] **Cron Jobs**: Sync endpoint ready at `/api/cron/sync-calendar`.
+- [x] **Environment**: `NEXT_PUBLIC_APP_URL` and all secrets configured.
+
+### Adding New Users to the Dashboard
+1. Provide the user with the login URL: `https://macnasmanager.vercel.app/login`
+2. After they sign in, they will see an "Access Denied" page.
+3. Open your Supabase Dashboard: **Authentication** > **Users** to find their generated `UUID` and `email`.
+4. Navigate to the **Table Editor** > `users` table.
+5. Insert a new row with their `UUID`, `email`, and desired `role` (e.g., `editor`).
+6. The user can now click "Sign out & try another account" and sign in again to access the dashboard!
+
+
+Congratulations on the launch of Studio Macnas!
 
 ### Public routes
 - `/` — Home hero page

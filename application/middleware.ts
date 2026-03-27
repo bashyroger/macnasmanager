@@ -38,11 +38,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If already authenticated, redirect away from /login to dashboard
-  if (user && request.nextUrl.pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/app";
-    return NextResponse.redirect(url);
+  if (user) {
+    const isAppRoute = request.nextUrl.pathname.startsWith("/app");
+    const isLoginRoute = request.nextUrl.pathname === "/login";
+
+    if (isAppRoute || isLoginRoute) {
+      // Check allowlist in public.users
+      const { data: appUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      if (!appUser) {
+        // Authenticated but not allowed
+        const url = request.nextUrl.clone();
+        url.pathname = "/unauthorized";
+        return NextResponse.redirect(url);
+      } else if (isLoginRoute) {
+        // Allowed user trying to access login, redirect to dashboard
+        const url = request.nextUrl.clone();
+        url.pathname = "/app";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;
