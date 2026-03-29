@@ -16,12 +16,20 @@ const now = new Date();
 const defaultStart = toDatetimeLocal(now);
 const defaultEnd = toDatetimeLocal(new Date(now.getTime() + 60 * 60 * 1000)); // +1 hour
 
-export function TimeEntryForm({ projects }: { projects: Project[] }) {
+export function TimeEntryForm({ 
+  projects,
+  initialStart,
+  initialEnd
+}: { 
+  projects: Project[],
+  initialStart?: string,
+  initialEnd?: string
+}) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [projectId, setProjectId] = useState("");
-  const [startTime, setStartTime] = useState(defaultStart);
-  const [endTime, setEndTime] = useState(defaultEnd);
+  const [startTime, setStartTime] = useState(initialStart ? toDatetimeLocal(new Date(initialStart)) : defaultStart);
+  const [endTime, setEndTime] = useState(initialEnd ? toDatetimeLocal(new Date(initialEnd)) : defaultEnd);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 

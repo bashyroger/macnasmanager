@@ -5,7 +5,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Log Time" };
 
-export default async function NewTimeEntryPage() {
+export default async function NewTimeEntryPage(props: {
+  searchParams: Promise<{ start?: string; end?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
   const { data: projects } = await supabase
     .from("projects")
@@ -22,7 +25,11 @@ export default async function NewTimeEntryPage() {
         </p>
         <h1 className="text-2xl font-semibold text-[#1a1714]">Log time</h1>
       </div>
-      <TimeEntryForm projects={projects ?? []} />
+      <TimeEntryForm 
+        projects={projects ?? []} 
+        initialStart={searchParams.start} 
+        initialEnd={searchParams.end} 
+      />
     </div>
   );
 }

@@ -1,0 +1,113 @@
+/* calendar-overrides.css */
+/* Overrides to adapt react-big-calendar to Macnasmanager's premium aesthetics */
+
+.rbc-calendar {
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+/* Header & Column Styling */
+.rbc-header {
+  padding: 0.75rem 0.5rem;
+  font-weight: 500;
+  color: #6b7280; /* text-gray-500 */
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e0d8 !important;
+}
+
+.rbc-month-view, .rbc-time-view, .rbc-agenda-view {
+  border: none !important;
+}
+
+.rbc-month-row, .rbc-day-bg {
+  border-color: #f3f0eb !important;
+}
+
+/* Today Higlight */
+.rbc-today {
+  background-color: #faf9f7 !important;
+}
+
+/* Event Tooltips/Container */
+.rbc-event {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Match Tailwind classes used elsewhere */
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.rbc-event:hover {
+  filter: brightness(0.95);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Time Grid Overrides */
+.rbc-timeslot-group {
+  border-color: #f3f0eb !important;
+}
+
+.rbc-time-content {
+  border-top: none;
+}
+
+.rbc-time-header.rbc-overflowing {
+  border-right: none;
+}
+
+/* Toolbar (Month/Week/Day buttons) Overrides */
+.rbc-toolbar {
+  margin-bottom: 1rem;
+}
+
+.rbc-toolbar button {
+  border: 1px solid #e5e0d8 !important;
+  color: #4b5563 !important; /* gray-600 */
+  border-radius: 8px !important;
+  padding: 0.375rem 0.75rem !important;
+  transition: all 0.15s ease-in-out !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+  font-weight: 500 !important;
+  background-color: white !important;
+}
+
+.rbc-toolbar button:hover {
+  background-color: #faf9f7 !important;
+  color: #1a1714 !important; /* brand black */
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: #be7b3b !important; /* brand brown */
+  color: white !important;
+  border-color: #be7b3b !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.rbc-toolbar button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(190, 123, 59, 0.2) !important;
+}
+
+/* Current timeframe title */
+.rbc-toolbar-label {
+  font-weight: 600;
+  color: #1a1714;
+  font-size: 1.125rem;
+}
+
+/* Hide generic scrollbar */
+.hide-scrollbar ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.hide-scrollbar ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hide-scrollbar ::-webkit-scrollbar-thumb {
+  background: #e5e0d8;
+  border-radius: 10px;
+}
+.hide-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: #d4d0c8;
+}

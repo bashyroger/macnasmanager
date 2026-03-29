@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { AlertCircle, Clock, Plus } from "lucide-react";
 import { TimeEntryList } from "./time-entry-list";
+import { TimeEntriesView } from "./time-entries-view";
 import type { Metadata } from "next";
 
 import { SyncCalendarButton } from "./sync-calendar-button";
@@ -53,15 +54,8 @@ export default async function TimeEntriesPage() {
         </Link>
       )}
 
-      {!entries || entries.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <Clock className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="text-lg font-medium mb-2">No time entries yet</p>
-          <p className="text-sm">Log time manually or sync via Google Calendar.</p>
-        </div>
-      ) : (
-        <TimeEntryList entries={entries as any[]} />
-      )}
+      {/* Render the unified list/calendar toggle wrapper */}
+      <TimeEntriesView entries={entries ?? []} />
     </div>
   );
 }
