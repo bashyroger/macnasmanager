@@ -75,6 +75,60 @@ export async function deleteCalendarEvent(
 
   return { success: true };
 }
+
+async function pushManualEntriesToCalendar(supabase: any, refreshToken: string) {
+  // 1. Fetch all manual entries without external_event_id
+  const { data: manualEntries } = await supabase
+    .from("time_entries")
+    .select("id, title, start_time, end_time, projects(short_code, title)")
+    .eq("source", "manual")
+    .is("external_event_id", null);
+
+  if (!manualEntries || manualEntries.length === 0) return 0;
+
+  let pushedCount = 0;
+
+  // 2. Push each to Google Calendar
+  for (const entry of manualEntries) {
+    let description = "Created via Studio Macnas Manager";
+    
+    // Typecast to handle exact Supabase relationship shapes
+    const project = (Array.isArray(entry.projects) ? entry.projects[0] : entry.projects) as any;
+    
+    if (project) {
+       description = `Project: ${project.title}`;
+       if (project.short_code) {
+         description += `\nCode: ${project.short_code}`;
+       }
+    }
+
+    try {
+      const gEvent = await createCalendarEvent(refreshToken, {
+        summary: entry.title,
+        description,
+        startTime: entry.start_time,
+        endTime: entry.end_time
+      });
+
+      // 3. Update Supabase with the new Google Event ID
+      // We change source to google_calendar to integrate tightly with the sync engine
+      if (gEvent && gEvent.id) {
+        await supabase
+          .from("time_entries")
+          .update({
+            external_event_id: gEvent.id,
+            source: "google_calendar"
+          })
+          .eq("id", entry.id);
+        
+        pushedCount++;
+      }
+    } catch (e) {
+      console.error("Failed to push manual entry to Google Calendar", entry.id, e);
+    }
+  }
+  return pushedCount;
+}
 export async function syncCalendarEvents(supabase: any) {
   let syncRunId: string | null = null;
   let recordsProcessed = 0;
@@ -106,6 +160,9 @@ export async function syncCalendarEvents(supabase: any) {
       throw new Error("No Google Calendar connected. Skipping sync.");
     }
 
+    // Bidirectional Integration: Push un-synced manual entries UP first
+    await pushManualEntriesToCalendar(supabase, tokenRecord.refresh_token);
+
     const oauth2Client = getGoogleOAuthClient();
     oauth2Client.setCredentials({ refresh_token: tokenRecord.refresh_token });
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
@@ -122,15 +179,33 @@ export async function syncCalendarEvents(supabase: any) {
       updatedMin: sinceTime,
       singleEvents: true,
       orderBy: "startTime",
+      showDeleted: true,
     });
 
     const events = response.data.items || [];
     
-    // Fetch all active projects to match against
     const { data: projects } = await supabase.from("projects").select("id, title, short_code");
 
-    // 4. Upsert events into time_entries
+    // "Ghost Prevention": fetch all events the user specifically deleted locally but kept in Google
+    const { data: ignoredRecords } = await (supabase.from("ignored_google_events") as any).select("external_event_id");
+    const ignoredEventIds = new Set<string>();
+    ignoredRecords?.forEach((r: any) => { if (r.external_event_id) ignoredEventIds.add(r.external_event_id); });
+
+    // 4. Upsert/Delete events into time_entries
     for (const event of events) {
+      if (!event.id || ignoredEventIds.has(event.id)) {
+        continue;
+      }
+
+      if (event.status === "cancelled") {
+        await supabase
+          .from("time_entries")
+          .delete()
+          .eq("external_event_id", event.id);
+        recordsProcessed++;
+        continue;
+      }
+
       if (!event.start?.dateTime || !event.end?.dateTime) continue; // Skip all-day events
 
       const durationMs = new Date(event.end.dateTime).getTime() - new Date(event.start.dateTime).getTime();
@@ -170,12 +245,37 @@ export async function syncCalendarEvents(supabase: any) {
         source: "google_calendar",
         project_id: assignedProjectId,
         needs_manual_assignment: needsManualAssignment,
-        google_event_id: event.id // Our unique key
+        external_event_id: event.id // Our unique key
       };
 
-      await supabase
+      // Check if event already exists
+      const { data: existingEntry } = await supabase
         .from("time_entries")
-        .upsert(upsertPayload, { onConflict: "google_event_id" });
+        .select("id, needs_manual_assignment, project_id")
+        .eq("external_event_id", event.id)
+        .limit(1)
+        .single();
+
+      if (existingEntry) {
+        const updatePayload = { ...upsertPayload };
+
+        // PRESERVATION SAFEGUARD: 
+        // If the user has already manually assigned this entry to a project inside Macnasmanager,
+        // we must NOT allow the automated sync to forcefully unassign it.
+        if (existingEntry.needs_manual_assignment === false) {
+          updatePayload.project_id = existingEntry.project_id;
+          updatePayload.needs_manual_assignment = false;
+        }
+
+        await supabase
+          .from("time_entries")
+          .update(updatePayload)
+          .eq("id", existingEntry.id);
+      } else {
+        await supabase
+          .from("time_entries")
+          .insert(upsertPayload);
+      }
 
       recordsProcessed++;
     }
@@ -188,7 +288,6 @@ export async function syncCalendarEvents(supabase: any) {
         finished_at: new Date().toISOString()
       }).eq("id", syncRunId);
     }
-
     return { success: true, recordsProcessed };
   } catch (error: any) {
     console.error("Calendar Sync Error:", error);
@@ -205,3 +304,4 @@ export async function syncCalendarEvents(supabase: any) {
     throw error;
   }
 }
+

@@ -1,9 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import { computeProjectSustainability } from "@/lib/sustainability";
 import { evaluateProductTier } from "@/lib/tiers";
 import { logAction } from "@/lib/audit";
+import { deleteCalendarEvent } from "@/lib/google-calendar";
 
 export async function saveProject(projectId: string | undefined, payload: any) {
   const supabase = await createClient();
@@ -34,6 +36,14 @@ export async function saveProject(projectId: string | undefined, payload: any) {
     targetId = data.id;
     await logAction("create", "project", targetId, { title: payload.title });
   }
+
+  // After saving, revalidate the paths to ensure the dashboard and project pages are up to date.
+  revalidatePath("/app/projects");
+  if (targetId) {
+    revalidatePath(`/app/projects/${targetId}`);
+  }
+  revalidatePath("/app/time-entries/unassigned");
+  revalidatePath("/"); // Public site
 
   if (targetId && triggerSnapshots) {
     // 1. Financial Snapshot
@@ -101,6 +111,9 @@ export async function saveProject(projectId: string | undefined, payload: any) {
         completed_at: new Date().toISOString(),
         product_tier_id: tierIdToAssign
       }).eq("id", targetId);
+      
+      // Revalidate again after snapshots
+      revalidatePath(`/app/projects/${targetId}`);
     }
   }
 
@@ -118,4 +131,89 @@ export async function toggleProjectPublish(projectId: string, isPublished: boole
   await logAction("publish_toggle", "project", projectId, { enabled: isPublished });
   
   return { success: true };
+}
+
+export async function deleteProject(projectId: string, deleteFromGoogle: boolean = false) {
+  const supabase = await createClient();
+
+  try {
+    // 1. Fetch all associated time entries
+    const { data: entries, error: entriesError } = await supabase
+      .from("time_entries")
+      .select("id, external_event_id")
+      .eq("project_id", projectId);
+
+    if (entriesError) throw entriesError;
+
+    // 2. Handle Google Calendar cleanup/silencing
+    if (deleteFromGoogle) {
+      // Fetch refresh token for deletion
+      const { data: tokenRecord } = await supabase
+        .from("google_tokens")
+        .select("refresh_token")
+        .limit(1)
+        .single();
+
+      if (tokenRecord?.refresh_token && entries) {
+        for (const entry of entries) {
+          if (entry.external_event_id) {
+            try {
+              await deleteCalendarEvent(tokenRecord.refresh_token, entry.external_event_id);
+            } catch (err) {
+              console.error(`Failed to delete Google event ${entry.external_event_id}`, err);
+              // We continue even if one deletion fails
+            }
+          }
+        }
+      }
+      
+      // Now delete the local time entries
+      if (entries && entries.length > 0) {
+        await supabase.from("time_entries").delete().eq("project_id", projectId);
+      }
+    } else {
+      // "Ghost Prevention": Keep the entries locally but unassign and silence them
+      // This ensures the next sync sees them as 'handled' and doesn't re-import as unassigned.
+      if (entries && entries.length > 0) {
+        await supabase
+          .from("time_entries")
+          .update({ 
+            project_id: null, 
+            needs_manual_assignment: false 
+          })
+          .eq("project_id", projectId);
+      }
+    }
+
+    // 3. Delete other dependent records manually (to be safe if cascade isn't set)
+    await Promise.all([
+      supabase.from("project_materials").delete().eq("project_id", projectId),
+      supabase.from("project_notes").delete().eq("project_id", projectId),
+      supabase.from("project_images").delete().eq("project_id", projectId),
+      supabase.from("project_financial_snapshots").delete().eq("project_id", projectId),
+      supabase.from("project_sustainability_snapshots").delete().eq("project_id", projectId),
+    ]);
+
+    // 4. Finally delete the project itself
+    const { error: deleteError } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId);
+
+    if (deleteError) throw deleteError;
+
+    await logAction("delete", "project", projectId, { 
+      deletedFromGoogle: deleteFromGoogle,
+      entriesProcessed: entries?.length || 0 
+    });
+
+    revalidatePath("/app/projects");
+    revalidatePath("/app/time-entries/unassigned");
+    revalidatePath("/");
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Delete Project Error:", error);
+    return { error: error.message || "Failed to delete project" };
+  }
 }

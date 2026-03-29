@@ -31,6 +31,7 @@ export async function updateWebsitePage(id: string, data: { title: string; body_
 
 import fs from "fs";
 import path from "path";
+import { processImage } from "@/lib/image-processor";
 
 export async function getMediaLibrary() {
   const mediaPath = path.join(process.cwd(), "public", "cms-media", "original");
@@ -46,9 +47,37 @@ export async function getMediaLibrary() {
       /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file)
     );
     
-    return { files: imageFiles };
+    return { files: imageFiles.sort() };
   } catch (error) {
     console.error("Error reading media library:", error);
     return { error: "Failed to read media library" };
+  }
+}
+
+export async function uploadMedia(formData: FormData) {
+  const file = formData.get("file") as File;
+  if (!file) {
+    return { error: "No file provided" };
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  try {
+    // Sanitize filename: replace spaces with hyphens, remove non-alphanumeric (except . and -)
+    const sanitizedName = file.name
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9\.\-]/g, "");
+
+    const result = await processImage(buffer, sanitizedName);
+    
+    await logAction("upload", "media", sanitizedName, { 
+      originalWidth: result.originalWidth 
+    });
+
+    return { success: true, result };
+  } catch (error: any) {
+    console.error("Error uploading media:", error);
+    return { error: error.message || "Failed to process image" };
   }
 }

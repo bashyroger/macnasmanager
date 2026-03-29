@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ProjectForm } from "../../project-form";
 import Link from "next/link";
 
@@ -15,7 +15,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   const project = pResult.data as any;
   const clients = cResult.data;
 
-  if (!project) notFound();
+  if (!project) redirect("/app/projects");
 
   return (
     <div className="max-w-xl">

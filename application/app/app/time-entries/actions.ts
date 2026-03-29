@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createCalendarEvent } from "@/lib/google-calendar";
+import { createCalendarEvent, syncCalendarEvents, deleteCalendarEvent } from "@/lib/google-calendar";
+import { revalidatePath } from "next/cache";
 
 type LogTimePayload = {
   title: string;
@@ -90,48 +91,56 @@ export async function triggerManualCalendarSync() {
   if (!userData.user) throw new Error("Not logged in");
 
   try {
-    const { syncCalendarEvents } = await import("@/lib/google-calendar");
     const result = await syncCalendarEvents(supabase);
+    revalidatePath("/app/time-entries");
     return result;
   } catch (error: any) {
     console.error("Manual sync failed:", error);
     throw new Error(error.message || "Manual sync failed");
   }
 }
-export async function deleteTimeEntry(id: string) {
+export async function deleteTimeEntry(id: string, deleteFromCalendar: boolean = true) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) throw new Error("Not logged in");
+  if (!userData?.user) throw new Error("Unauthorized");
 
-  // 1. Get the entry to find the external_event_id
+  // 1. Fetch the entry to see if it's connected to Google Calendar
   const { data: entry } = await supabase
     .from("time_entries")
     .select("external_event_id")
     .eq("id", id)
     .single();
 
-  // 2. If it has a external_event_id, try to delete it from calendar
   if (entry?.external_event_id) {
-    const { data: tokens } = await supabase
-      .from("google_tokens")
-      .select("refresh_token")
-      .eq("user_id", userData.user.id)
-      .single();
+    if (deleteFromCalendar) {
+      const { data: tokens } = await supabase
+        .from("google_tokens")
+        .select("refresh_token")
+        .eq("user_id", userData.user.id)
+        .single();
 
-    if (tokens?.refresh_token) {
-      try {
-        const { deleteCalendarEvent } = await import("@/lib/google-calendar");
-        await deleteCalendarEvent(tokens.refresh_token, entry.external_event_id);
-      } catch (calError) {
-        console.error("Failed to delete event from Google Calendar:", calError);
-        // We continue with local delete even if calendar delete fails (e.g. event already gone)
+      if (tokens?.refresh_token) {
+        try {
+          await deleteCalendarEvent(tokens.refresh_token, entry.external_event_id);
+        } catch (calError) {
+          console.error("Failed to delete event from Google Calendar:", calError);
+        }
       }
+    } else {
+      // "Ghost Prevention": remember we ignored this event so next sync doesn't resurrect it
+      // @ts-ignore - Table created outside of currently tracked Supabase schema
+      await supabase.from("ignored_google_events").upsert(
+        { external_event_id: entry.external_event_id },
+        { onConflict: "external_event_id" }
+      );
     }
   }
 
   // 3. Delete from Supabase
   const { error: dbError } = await supabase.from("time_entries").delete().eq("id", id);
   if (dbError) throw new Error(dbError.message);
+
+  revalidatePath("/app/time-entries");
 
   return { success: true };
 }

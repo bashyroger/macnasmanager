@@ -65,8 +65,7 @@ export function TimeEntryForm({ projects }: { projects: Project[] }) {
     }
 
     setSubmitting(false);
-    router.push("/app/time-entries");
-    router.refresh();
+    window.location.href = "/app/time-entries";
   };
 
   return (

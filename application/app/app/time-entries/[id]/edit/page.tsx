@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { TimeEntryEditForm } from "./time-entry-edit-form";
 import type { Metadata } from "next";
@@ -31,7 +31,7 @@ export default async function EditTimeEntryPage({ params }: Props) {
       .order("title"),
   ]);
 
-  if (!entry) notFound();
+  if (!entry) redirect("/app/time-entries");
 
   return (
     <div>

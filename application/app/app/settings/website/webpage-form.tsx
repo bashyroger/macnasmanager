@@ -4,12 +4,13 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler, useFieldArray, Control } from "react-hook-form";
 import { updateWebsitePage } from "./actions";
+import { getMediaLibrary, uploadMedia } from "./actions";
 import { 
   Loader2, Save, ArrowLeft, Plus, Trash2, 
-  GripVertical, Image as ImageIcon, Type, AlignLeft, Calendar, Link as LinkIcon, Search, X
+  GripVertical, Image as ImageIcon, Type, AlignLeft, Calendar, Link as LinkIcon, Search, X, Upload
 } from "lucide-react";
-import { getMediaLibrary } from "./actions";
 import Link from "next/link";
+import { MediaPicker } from "@/components/dashboard/media-picker";
 
 type Props = {
   page: {
@@ -196,101 +197,6 @@ function SectionWrapper({ title, description, children }: { title: string; descr
 /**
  * MEDIA PICKER MODAL
  */
-function MediaPickerModal({ 
-  isOpen, 
-  onClose, 
-  onSelect 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onSelect: (path: string) => void;
-}) {
-  const [media, setMedia] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
-
-  const fetchMedia = async () => {
-    setLoading(true);
-    const result = await getMediaLibrary();
-    if (result.files) {
-      setMedia(result.files);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (isOpen) fetchMedia();
-  }, [isOpen]);
-
-  const filteredMedia = media.filter(m => m.toLowerCase().includes(search.toLowerCase()));
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <div className="absolute inset-0 bg-[#1a1714]/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#e5e0d8]">
-        {/* Header */}
-        <div className="p-6 border-b border-[#e5e0d8] flex items-center justify-between bg-gray-50/50">
-          <div>
-            <h3 className="text-lg font-bold text-[#1a1714]">Media Library</h3>
-            <p className="text-xs text-gray-400 font-medium uppercase tracking-widest mt-0.5">Select an asset from /cms-media/original</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="p-4 border-b border-[#e5e0d8]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search images..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-[#e5e0d8] bg-gray-50/50 text-sm focus:ring-2 focus:ring-[#be7b3b]/20 focus:border-[#be7b3b] outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="flex-1 overflow-y-auto p-6 bg-white">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-[#be7b3b]" />
-              <p className="text-sm text-gray-400 font-medium">Scanning media folder...</p>
-            </div>
-          ) : filteredMedia.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-sm text-gray-400">No images found matching your search.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {filteredMedia.map((file) => (
-                <button
-                  key={file}
-                  onClick={() => onSelect(`/cms-media/original/${file}`)}
-                  className="group relative aspect-square rounded-2xl border border-[#e5e0d8] overflow-hidden hover:border-[#be7b3b] hover:ring-4 hover:ring-[#be7b3b]/10 transition-all text-left bg-[#fcfaf8]"
-                >
-                  <img 
-                    src={`/cms-media/original/${file}`} 
-                    alt={file}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                    <p className="text-[10px] text-white font-medium truncate w-full">{file}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function StandardField({ config, register, openPicker, watchValue }: { config: FieldConfig; register: any; openPicker?: (name: string) => void; watchValue?: string }) {
   const inputClass = "w-full px-4 py-2.5 rounded-xl border border-[#e5e0d8] bg-white text-sm transition-all outline-none focus:ring-2 focus:ring-[#be7b3b]/20 focus:border-[#be7b3b] hover:border-gray-300";
@@ -545,7 +451,7 @@ export function WebsitePageForm({ page }: Props) {
           </SectionWrapper>
         ))}
 
-        <MediaPickerModal 
+        <MediaPicker 
           isOpen={pickerOpen} 
           onClose={() => setPickerOpen(false)} 
           onSelect={handleMediaSelect} 

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { deleteTimeEntry } from "../../actions";
+import { CheckCircle } from "lucide-react";
 
 function toDatetimeLocal(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -33,6 +35,8 @@ export function TimeEntryEditForm({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteFromGoogle, setDeleteFromGoogle] = useState(true);
 
   const durationMinutes = (() => {
     if (!startTime || !endTime) return null;
@@ -71,21 +75,16 @@ export function TimeEntryEditForm({
 
     setSubmitting(false);
     if (dbError) { setError(dbError.message); return; }
-    router.push("/app/time-entries");
-    router.refresh();
+    window.location.href = "/app/time-entries";
   };
 
   const handleDelete = async () => {
-    if (!confirm("Delete this time entry? This cannot be undone.")) return;
     setDeleting(true);
     try {
-      const { deleteTimeEntry } = await import("../../actions");
-      await deleteTimeEntry(entry.id);
-      router.push("/app/time-entries");
-      router.refresh();
+      await deleteTimeEntry(entry.id, deleteFromGoogle);
+      window.location.href = "/app/time-entries";
     } catch (err: any) {
       setError(err.message || "Failed to delete entry");
-    } finally {
       setDeleting(false);
     }
   };
@@ -165,15 +164,74 @@ export function TimeEntryEditForm({
         >
           Cancel
         </button>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={deleting}
-          className="ml-auto px-4 py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors focus:ring-2 focus:ring-red-200 focus:ring-offset-2"
-        >
-          {deleting ? "Deleting…" : "Delete entry"}
-        </button>
+        {!showDeleteConfirm && (
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            className="ml-auto px-4 py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors focus:ring-2 focus:ring-red-200 focus:ring-offset-2"
+          >
+            {deleting ? "Deleting…" : "Delete entry"}
+          </button>
+        )}
       </div>
+
+      {showDeleteConfirm && (
+        <div className="mt-6 p-6 rounded-3xl border-2 border-red-100 bg-red-50/30 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex gap-4 items-start mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-red-600 text-xl font-bold">!</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#1a1714]">Delete this entry?</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                This action cannot be undone. 
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <label className="flex items-start gap-3 p-4 rounded-2xl border border-red-100 bg-white/50 cursor-pointer hover:bg-white transition-colors group">
+              <div className="relative flex items-center mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={deleteFromGoogle}
+                  onChange={(e) => setDeleteFromGoogle(e.target.checked)}
+                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-[#e5e0d8] bg-white transition-all checked:bg-red-500 checked:border-red-500"
+                />
+                <CheckCircle className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity pointer-events-none" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-[#1a1714] group-hover:text-red-600 transition-colors">Also delete from Google Calendar</p>
+                <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                  {deleteFromGoogle 
+                    ? "The event will also be permanently removed from your calendar."
+                    : "The event will stay in your calendar but will be ignored by future syncs."}
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={handleDelete}
+              className="px-6 py-2.5 rounded-2xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 ml-auto disabled:opacity-60"
+            >
+              {deleting ? "Deleting..." : "Yes, delete it"}
+            </button>
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-6 py-2.5 rounded-2xl border-2 border-white bg-white text-gray-600 text-sm font-bold hover:bg-gray-50 transition-all shadow-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
