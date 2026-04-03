@@ -20,84 +20,63 @@ export default async function ProjectsPage() {
 
   return (
     <div className="bg-[#171717] min-h-screen">
-      {/* Hero */}
-      <section className="relative h-[60vh] flex items-center bg-[#000000] mb-24">
-        <div className="absolute inset-0 opacity-30">
-          <Image
-            src="/cms-media/original/Studio-Macnas-WNDRLST-site-27JPG.jpg"
-            alt="Projects Archive"
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority
-          />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6 uppercase">
-              Project <span className="text-[#fafA00]">Archive</span>
+      {/* Dynamic Hero to match legacy Materials/Events style */}
+      <section className="relative h-[80vh] min-h-[600px] flex items-center pt-24 overflow-hidden border-b border-white/10">
+        <Image
+          src="/cms-media/original/Studio-Macnas-WNDRLST-site-27JPG.jpg"
+          alt="Projects Archive"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        {/* Dark gradient overlay matching legacy */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#171717] via-[#171717]/80 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-auto mb-24 md:mt-0 md:mb-0">
+          <div className="max-w-2xl text-center md:text-left mx-auto md:mx-0">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase mb-6 leading-none">
+              Projects
             </h1>
-            <p className="text-xl text-[#a9a9a9] max-w-xl leading-relaxed whitespace-pre-wrap">
-              Each project is a chapter in our journey toward sustainable creation. 
-              Documenting the story, materials, and impact behind every piece we craft.
+            <p className="text-[#a9a9a9] text-xl leading-relaxed max-w-xl mx-auto md:mx-0">
+              Our focus is not only on creating sustainable bags, but also on creating sustainable relations with our clients.<br /><br />
+              From material selection to design thinking, this is how we approached our clients requests.
             </p>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         {!projects || projects.length === 0 ? (
           <div className="py-20 border-t border-white/10">
             <p className="text-[#a9a9a9]">No projects found in the archive yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-24 gap-x-12">
             {projects.map((project) => (
-              <Link 
-                key={project.id} 
-                href={`/projects/${project.slug}`}
-                className="group flex flex-col"
-              >
-                <div className="relative h-[450px] mb-6 overflow-hidden bg-black border border-white/5">
-                  {project.hero_image_path ? (
-                    <Image
-                      src={project.hero_image_path}
-                      alt={project.public_title || project.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-4xl grayscale opacity-20">
-                      👜
-                    </div>
-                  )}
-                  {/* Decorative corner */}
-                  <div className="absolute top-0 right-0 w-12 h-12 bg-[#fafA00] translate-x-12 -translate-y-12 group-hover:translate-x-6 group-hover:-translate-y-6 transition-transform" />
-                </div>
-                
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-[2px] w-8 bg-[#ef5cff]" />
-                  <span className="text-[#ef5cff] text-[10px] font-black uppercase tracking-[0.2em]">
-                    {project.status}
-                  </span>
-                </div>
-
-                <h3 className="text-white text-2xl font-black uppercase tracking-tighter group-hover:text-[#fafA00] transition-colors mb-2">
-                  {project.public_title || project.title}
-                </h3>
-                
-                <p className="text-[#a9a9a9] text-sm leading-relaxed line-clamp-3 mb-6">
-                  {project.public_description}
-                </p>
-
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
-                   <span className="text-white text-xs font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                     View Passport →
-                   </span>
-                </div>
-              </Link>
+             <div key={project.id} className="flex flex-col group">
+                <Link href={`/projects/${project.slug}`} className="block">
+                  <div className="relative aspect-[4/3] w-full mb-6 bg-[#111] overflow-hidden rounded-sm border border-white/5">
+                    {project.hero_image_path ? (
+                      <Image
+                        src={project.hero_image_path}
+                        alt={project.public_title || project.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-4xl grayscale opacity-20">
+                        👜
+                      </div>
+                    )}
+                  </div>
+                  <h1 className="text-4xl text-white font-black tracking-tighter uppercase leading-none mb-2 group-hover:text-[#fafA00] transition-colors">{project.status}</h1>
+                  <h2 className="text-xl text-white font-bold uppercase tracking-widest mb-4">{project.public_title || project.title}</h2>
+                  <p className="text-[#a9a9a9] text-base leading-relaxed line-clamp-4">
+                    {project.public_description}
+                  </p>
+                </Link>
+             </div>
             ))}
           </div>
         )}

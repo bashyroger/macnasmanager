@@ -92,7 +92,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           {/* Sidebar Metadata */}
           <div className="lg:col-span-4 space-y-12">
              <div className="bg-[#000000] p-8 border border-white/5 rounded-2xl">
-                <h3 className="text-[#ef5cff] text-xs font-black uppercase tracking-widest mb-8">Metadata</h3>
+                <h3 className="text-[#ef5cff] text-xs font-black uppercase tracking-widest mb-8">Project Details</h3>
                 
                 <div className="space-y-8">
                   <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
@@ -24,14 +25,15 @@ export function PublicNav() {
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-[#fafA00] flex items-center justify-center font-black text-black text-2xl group-hover:scale-110 transition-transform">
-                M
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-[#ef5cff] font-medium text-sm tracking-tight">
-                  Rethinking fashion patterns
-                </span>
+            <Link href="/" className="flex items-center group">
+              <div className="relative h-20 w-[320px] flex items-center -ml-4">
+                <Image
+                  src="/cms-media/original/logo_studiomacnas.png"
+                  alt="Studio Macnas Logo"
+                  fill
+                  className="object-contain object-left group-hover:scale-[1.03] transition-transform origin-left"
+                  priority
+                />
               </div>
             </Link>
           </div>
@@ -50,8 +52,8 @@ export function PublicNav() {
                 {link.name}
               </Link>
             ))}
-            <Link 
-              href="/app" 
+            <Link
+              href="/app"
               className="px-4 py-2 rounded-lg bg-[#fafA00] text-black text-xs font-bold hover:bg-white transition-all ml-4"
             >
               Manager Login
@@ -60,7 +62,7 @@ export function PublicNav() {
 
           {/* Mobile Toggle */}
           <div className="md:hidden flex items-center">
-            <button 
+            <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md text-gray-400 hover:text-white"
             >
@@ -87,7 +89,7 @@ export function PublicNav() {
             </Link>
           ))}
           <div className="pt-4 border-t border-white/10">
-            <Link 
+            <Link
               href="/app"
               className="block text-center px-4 py-3 rounded-xl bg-[#fafA00] text-black font-bold"
             >
