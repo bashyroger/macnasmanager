@@ -19,17 +19,33 @@ export default async function ProjectsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="bg-[#171717] min-h-screen py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-20">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6 uppercase">
-            Project <span className="text-[#fafA00]">Archive</span>
-          </h1>
-          <p className="text-[#a9a9a9] text-lg max-w-2xl leading-relaxed">
-            Each project is a chapter in our journey toward sustainable creation. 
-            Documenting the story, materials, and impact behind every piece we craft.
-          </p>
+    <div className="bg-[#171717] min-h-screen">
+      {/* Hero */}
+      <section className="relative h-[60vh] flex items-center bg-[#000000] mb-24">
+        <div className="absolute inset-0 opacity-30">
+          <Image
+            src="/cms-media/original/Studio-Macnas-WNDRLST-site-27JPG.jpg"
+            alt="Projects Archive"
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority
+          />
         </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-3xl">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6 uppercase">
+              Project <span className="text-[#fafA00]">Archive</span>
+            </h1>
+            <p className="text-xl text-[#a9a9a9] max-w-xl leading-relaxed whitespace-pre-wrap">
+              Each project is a chapter in our journey toward sustainable creation. 
+              Documenting the story, materials, and impact behind every piece we craft.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
 
         {!projects || projects.length === 0 ? (
           <div className="py-20 border-t border-white/10">

@@ -26,7 +26,7 @@ export default async function EventsPage() {
               <span className="text-[#ef5cff] text-2xl font-medium italic">Inspire & Educate</span>
            </div>
            {body_json.hero_image && (
-             <div className="w-full md:w-96 aspect-square grayscale border-2 border-[#fafA00] relative rotate-3 hover:rotate-0 transition-transform">
+             <div className="w-full md:w-96 aspect-square border-2 border-[#fafA00] relative rotate-3 hover:rotate-0 transition-transform">
                <Image 
                 src={body_json.hero_image} 
                 alt="Event hero" 

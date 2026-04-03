@@ -29,5 +29,11 @@ Windows-specific tools (like PowerShell redirections or Supabase CLI) may defaul
 - Active work must be tracked in the conversation-level `task.md`.
 - Post-implementation walkthroughs are mandatory in `walkthrough.md`.
 
+## 🧠 Memory Bank (Antigravity Persistent Context)
+- **At the start of every session**, run `/memory-bank` to load compressed context from recent sessions via the Antigravity memory bank.
+- **At the end of every meaningful session**, run `/compress-session` to save what was done into the memory bank for future sessions.
+- The full session history lives in: `C:\Users\rogie\.gemini\antigravity\knowledge\macnasmanager\`
+- A human-readable summary of recent sessions is committed to this repo at: `memory.md` — always read it at session start if `/memory-bank` is not yet run.
+
 ## ⚠️ Known Issues & Fixes
 - **TypeScript `never` types**: Often caused by encoding mismatches in `database.types.ts`. Fix encoding via `node fix-encoding.js` before debugging types.

@@ -81,7 +81,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           <div className="lg:col-span-8 space-y-12">
             <div className="space-y-6">
               <div className="w-12 h-1 bg-[#ef5cff] mb-8" />
-              <p className="text-2xl md:text-3xl font-medium text-white leading-relaxed">
+              <p className="text-base md:text-lg text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {project.public_description}
               </p>
             </div>

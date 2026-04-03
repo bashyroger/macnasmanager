@@ -20,7 +20,7 @@ export default async function BagsPage() {
     <div className="bg-[#171717] min-h-screen">
       {/* Hero */}
       <section className="relative h-[60vh] flex items-center bg-[#000000]">
-        <div className="absolute inset-0 grayscale opacity-30">
+        <div className="absolute inset-0 opacity-30">
           <Image
             src={body_json.hero_image || "/images/website/bags-hero.jpg"}
             alt="Bags"
