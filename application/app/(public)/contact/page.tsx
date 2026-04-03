@@ -94,6 +94,7 @@ export default async function ContactPage() {
              alt="Studio Macnas Contact" 
              fill
              className="object-cover object-[center_25%]"
+             sizes="100vw"
           />
        </section>
     </div>

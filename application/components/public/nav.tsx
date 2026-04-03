@@ -31,6 +31,7 @@ export function PublicNav() {
                   src="/cms-media/original/logo_studiomacnas.png"
                   alt="Studio Macnas Logo"
                   fill
+                  sizes="320px"
                   className="object-contain object-left group-hover:scale-[1.03] transition-transform origin-left"
                   priority
                 />

@@ -144,6 +144,7 @@ export default async function PublicHomePage() {
                 alt="Outro Studio"
                 fill
                 className="object-cover rounded-md opacity-80"
+                sizes="(max-width: 1024px) 100vw, 1200px"
               />
             </div>
           </div>

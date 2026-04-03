@@ -27,6 +27,7 @@ export default async function EventsPage() {
               alt={body_json.title || "Events"}
               fill
               className="object-cover object-center"
+              sizes="100vw"
               priority
             />
             {/* Gradient overlay to smoothly blend image into the dark page background */}
@@ -67,6 +68,7 @@ export default async function EventsPage() {
                      alt={ev.title} 
                      fill 
                      className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                     sizes="(max-width: 768px) 100vw, 33vw"
                    />
                 </div>
                 <h3 className="text-2xl text-white font-black tracking-tighter uppercase mb-2 group-hover:text-[#fafA00] transition-colors">{ev.title}</h3>
@@ -98,14 +100,14 @@ export default async function EventsPage() {
              </div>
            </div>
            <div className="relative aspect-[4/3] w-[80%] md:w-full mx-auto md:mx-0 bg-[#111] overflow-hidden rounded border border-white/5 order-1 md:order-2">
-              <Image src="/cms-media/original/Materialexplorer.jpg" alt="Expo" fill className="object-cover" />
+              <Image src="/cms-media/original/Materialexplorer.jpg" alt="Expo" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
            </div>
         </div>
 
         {/* Workshops */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
            <div className="relative aspect-[4/3] w-[80%] md:w-full mx-auto md:mx-0 bg-[#111] overflow-hidden rounded border border-white/5">
-              <Image src="/cms-media/original/course.png" alt="Workshop" fill className="object-cover" />
+              <Image src="/cms-media/original/course.png" alt="Workshop" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
            </div>
            <div className="space-y-6 text-center md:text-left">
              <h2 className="text-4xl text-white font-black tracking-tighter uppercase">Workshops</h2>
@@ -137,7 +139,7 @@ export default async function EventsPage() {
              </div>
            </div>
            <div className="relative aspect-[4/3] w-[80%] md:w-full mx-auto md:mx-0 bg-[#111] overflow-hidden rounded border border-white/5 order-1 md:order-2">
-              <Image src="/cms-media/original/ac596e7600fd4d62821d83e3df2f4e3e(1).jpg" alt="Seminar" fill className="object-cover" />
+              <Image src="/cms-media/original/ac596e7600fd4d62821d83e3df2f4e3e(1).jpg" alt="Seminar" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
            </div>
         </div>
       </section>

@@ -27,6 +27,7 @@ export default async function ProjectsPage() {
           alt="Projects Archive"
           fill
           className="object-cover object-center"
+          sizes="100vw"
           priority
         />
         {/* Dark gradient overlay matching legacy */}

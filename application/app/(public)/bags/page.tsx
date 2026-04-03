@@ -68,13 +68,13 @@ export default async function BagsPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative aspect-square bg-[#0a0a0a] rounded-sm overflow-hidden border border-white/5">
-               <Image src="/cms-media/original/P6120074.jpg" alt="Gallery" fill className="object-cover" />
+               <Image src="/cms-media/original/P6120074.jpg" alt="Gallery" fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
             </div>
             <div className="relative aspect-square bg-[#0a0a0a] rounded-sm overflow-hidden border border-white/5">
-               <Image src="/cms-media/original/DSC04538.jpg" alt="Gallery" fill className="object-cover object-top" />
+               <Image src="/cms-media/original/DSC04538.jpg" alt="Gallery" fill className="object-cover object-top" sizes="(max-width: 768px) 100vw, 33vw" />
             </div>
             <div className="relative aspect-square bg-[#0a0a0a] rounded-sm overflow-hidden border border-white/5">
-               <Image src="/cms-media/original/WhatsApp_Image_20220221_at_17.12.34_1.jpeg" alt="Gallery" fill className="object-cover" />
+               <Image src="/cms-media/original/WhatsApp_Image_20220221_at_17.12.34_1.jpeg" alt="Gallery" fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
             </div>
          </div>
       </section>
@@ -96,6 +96,7 @@ export default async function BagsPage() {
                   alt={step.title}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
              </div>
              <div className="space-y-4 text-center md:text-left">
