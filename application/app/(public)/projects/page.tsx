@@ -16,7 +16,7 @@ export default async function ProjectsPage() {
     .from("projects")
     .select("*")
     .eq("publish_enabled", true)
-    .order("created_at", { ascending: false });
+    .order("target_delivery_date", { ascending: false });
 
   return (
     <div className="bg-[#171717] min-h-screen">
@@ -70,7 +70,7 @@ export default async function ProjectsPage() {
                       </div>
                     )}
                   </div>
-                  <h1 className="text-4xl text-white font-black tracking-tighter uppercase leading-none mb-2 group-hover:text-[#fafA00] transition-colors">{project.status}</h1>
+
                   <h2 className="text-xl text-white font-bold uppercase tracking-widest mb-4">{project.public_title || project.title}</h2>
                   <p className="text-[#a9a9a9] text-base leading-relaxed line-clamp-4">
                     {project.public_description}

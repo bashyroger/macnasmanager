@@ -7,7 +7,7 @@ export default async function ProjectsPage() {
   const supabase = await createClient();
   const { data: projects } = await supabase
     .from("projects")
-    .select("id, title, slug, status, short_code, clients(full_name), created_at")
+    .select("id, title, slug, status, short_code, clients(full_name), created_at, start_date, target_delivery_date")
     .eq("is_archived", false)
     .order("created_at", { ascending: false });
 

@@ -23,6 +23,8 @@ type Project = {
   short_code: string | null;
   clients: { full_name: string } | null;
   created_at: string;
+  start_date: string | null;
+  target_delivery_date: string | null;
 };
 
 export function ProjectList({ projects }: { projects: Project[] }) {
@@ -81,6 +83,20 @@ export function ProjectList({ projects }: { projects: Project[] }) {
       className: "hidden md:table-cell text-sm text-gray-500",
       sortAccessor: (p) => p.clients?.full_name || "",
       cell: (project) => project.clients?.full_name ?? "—",
+    },
+    {
+      header: "Start",
+      accessorKey: "start_date",
+      sortable: true,
+      className: "hidden lg:table-cell text-sm text-gray-400",
+      cell: (project) => project.start_date ?? "—",
+    },
+    {
+      header: "Delivery",
+      accessorKey: "target_delivery_date",
+      sortable: true,
+      className: "hidden lg:table-cell text-sm text-gray-500",
+      cell: (project) => project.target_delivery_date ?? "—",
     },
     {
       header: "Status",
