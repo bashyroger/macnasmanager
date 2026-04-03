@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  transpilePackages: ["react-big-calendar"],
 };
 
 export default nextConfig;
