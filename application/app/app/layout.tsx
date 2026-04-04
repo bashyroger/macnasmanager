@@ -16,8 +16,8 @@ export default async function AppLayout({
       {/* Sidebar */}
       <DashboardNav user={user} />
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Main content — pt-14 offsets the mobile fixed top bar */}
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         <div className="p-6 md:p-8 max-w-7xl mx-auto">
           {children}
         </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -16,6 +17,8 @@ import {
   Globe,
   LogOut,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +62,13 @@ const settingsItems = [
   { label: "Integrations", href: "/app/settings/integrations" },
 ];
 
-export function DashboardNav({ user }: { user: User }) {
+function NavContent({
+  user,
+  onClose,
+}: {
+  user: User;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -70,14 +79,20 @@ export function DashboardNav({ user }: { user: User }) {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen bg-white border-r border-[#e5e0d8] flex-shrink-0">
+    <>
       {/* Brand */}
       <div className="px-4 py-5 border-b border-[#e5e0d8]">
-        <Link href="/app" className="flex items-center gap-3">
+        <Link
+          href="/app"
+          className="flex items-center gap-3"
+          onClick={onClose}
+        >
           <div className="w-8 h-8 rounded-lg bg-[#be7b3b] flex items-center justify-center">
             <span className="text-white text-sm font-bold">M</span>
           </div>
-          <span className="text-sm font-semibold text-[#1a1714]">Studio Macnas</span>
+          <span className="text-sm font-semibold text-[#1a1714]">
+            Studio Macnas
+          </span>
         </Link>
       </div>
 
@@ -85,11 +100,15 @@ export function DashboardNav({ user }: { user: User }) {
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-0.5">
           {navItems.map((item) => {
-            const active = item.href === "/app" ? pathname === "/app" : pathname.startsWith(item.href);
+            const active =
+              item.href === "/app"
+                ? pathname === "/app"
+                : pathname.startsWith(item.href);
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={onClose}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     active
@@ -107,7 +126,9 @@ export function DashboardNav({ user }: { user: User }) {
 
         {/* Settings group */}
         <div className="mt-6">
-          <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Settings</p>
+          <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+            Settings
+          </p>
           <ul className="space-y-0.5">
             {settingsItems.map((item) => {
               const active = pathname.startsWith(item.href);
@@ -115,6 +136,7 @@ export function DashboardNav({ user }: { user: User }) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={onClose}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
                       active
@@ -153,7 +175,9 @@ export function DashboardNav({ user }: { user: User }) {
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[#1a1714] truncate">{user.email}</p>
+            <p className="text-xs font-medium text-[#1a1714] truncate">
+              {user.email}
+            </p>
           </div>
           <button
             onClick={handleSignOut}
@@ -164,6 +188,63 @@ export function DashboardNav({ user }: { user: User }) {
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function DashboardNav({ user }: { user: User }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* ── Desktop sidebar (md+) ── */}
+      <aside className="hidden md:flex flex-col w-60 h-screen bg-white border-r border-[#e5e0d8] flex-shrink-0">
+        <NavContent user={user} />
+      </aside>
+
+      {/* ── Mobile top bar (< md) ── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 bg-white border-b border-[#e5e0d8]">
+        <Link href="/app" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-[#be7b3b] flex items-center justify-center">
+            <span className="text-white text-xs font-bold">M</span>
+          </div>
+          <span className="text-sm font-semibold text-[#1a1714]">
+            Studio Macnas
+          </span>
+        </Link>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-2 rounded-md text-gray-500 hover:text-[#1a1714] hover:bg-[#faf9f7] transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* ── Mobile drawer overlay ── */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Drawer panel */}
+          <aside className="relative flex flex-col w-72 max-w-[85vw] h-full bg-white shadow-xl">
+            {/* Close button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-3 right-3 p-2 rounded-md text-gray-400 hover:text-[#1a1714] hover:bg-[#faf9f7] transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <NavContent user={user} onClose={() => setIsOpen(false)} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
