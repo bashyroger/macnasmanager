@@ -111,3 +111,25 @@
 .hide-scrollbar ::-webkit-scrollbar-thumb:hover {
   background: #d4d0c8;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .rbc-toolbar .rbc-btn-group {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .rbc-toolbar button {
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 0.5rem !important;
+  }
+  .rbc-toolbar-label {
+    margin: 0.25rem 0;
+    font-size: 1rem;
+  }
+}

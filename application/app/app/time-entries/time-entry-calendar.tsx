@@ -24,9 +24,13 @@ export function TimeEntryCalendar({ entries }: { entries: any[] }) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<View>("week");
+  const [isMobile, setIsMobile] = useState(false);
 
   // Load saved state on mount
   useEffect(() => {
+    const isNowMobile = window.innerWidth < 768;
+    setIsMobile(isNowMobile);
+
     const savedDate = localStorage.getItem("macnas_calendar_date");
     if (savedDate) {
       const d = new Date(savedDate);
@@ -35,8 +39,28 @@ export function TimeEntryCalendar({ entries }: { entries: any[] }) {
     
     const savedView = localStorage.getItem("macnas_calendar_view");
     if (savedView) {
-      setCurrentView(savedView as View);
+      if (isNowMobile && savedView === "week") {
+        setCurrentView("day");
+      } else {
+        setCurrentView(savedView as View);
+      }
+    } else if (isNowMobile) {
+      setCurrentView("day");
     }
+
+    const handleResize = () => {
+      const mobileStatus = window.innerWidth < 768;
+      setIsMobile(mobileStatus);
+      setCurrentView((prev) => {
+        if (mobileStatus && prev === "week") {
+          return "day";
+        }
+        return prev;
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleNavigate = (newDate: Date) => {
@@ -102,7 +126,7 @@ export function TimeEntryCalendar({ entries }: { entries: any[] }) {
           onNavigate={handleNavigate}
           view={currentView}
           onView={handleViewChange}
-          views={["month", "week", "day"]}
+          views={isMobile ? ["month", "day"] : ["month", "week", "day"]}
           popup={true}
           selectable={true}
           onSelectSlot={(slotInfo) => {
