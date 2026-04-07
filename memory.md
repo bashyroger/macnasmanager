@@ -5,27 +5,27 @@
 
 ---
 
-## Last Session: 2026-04-03
+## Last Session: 2026-04-04
 
-**Goal**: Antigravity Memory Bank Setup — adapting claude-mem's pattern to work natively with Antigravity.
+**Goal**: Mobile Usability Fixes — addressing broken navigation and unusable calendar views on small screens.
 
 **Key Decisions**:
-- claude-mem cannot be installed directly (Claude Code plugin, incompatible with Antigravity)
-- Two global workflows created: `/compress-session` (end of session) + `/memory-bank` (start of session)
-- KI per project in `C:\Users\rogie\.gemini\antigravity\knowledge\macnasmanager\`
+- Dashboard sidebar is now a slide-in drawer on mobile (`< md`).
+- "Week" view disabled on mobile to prevent 7-column squishing; default to "Day" view.
+- Calendar toolbar buttons stack vertically on mobile for better touch targets.
+- Main content area uses `pt-14` offset to accommodate the new mobile fixed top bar.
 
 **Patterns Established**:
-- KI format: `metadata.json` index + `artifacts/session_<date>.md` per session
-- `// turbo` annotations on safe-to-auto-run workflow steps
-- `knowledge.lock` is a plain-text audit log (not JSON)
+- Use `isMobile` client-side state for component-level prop adjustments (e.g., `views` list).
+- Standardized `h-14` height for mobile dashboard headers with calculated layout offsets.
 
 **Open TODOs**:
-- (done this session) Added `/memory-bank` + `memory.md` instructions to AGENTS.md
-- Continue macnasmanager feature development (calendar sync, time entries, CMS)
+- Continue macnasmanager feature development (calendar sync, CMS content editing).
+- Monitor mobile performance with many calendar entries in "Month" view.
 
 **Gotchas**:
-- Always UTF-8 for all files in `knowledge/` — never PowerShell `>` redirections
-- KI summaries at session start are titles-only; artifacts need explicit `view_file` reads
+- `react-big-calendar` requires explicit `views` array manipulation to remove toolbar buttons.
+- Always ensure `onClose` is called on mobile drawers after link clicks.
 
 ---
 
@@ -38,6 +38,7 @@
 | `<DataTable />` | Generic reusable table component for all dashboard pages |
 | `apply_migration` | All DDL goes through Supabase MCP `apply_migration`, never raw SQL in prod |
 | `hard navigation` | After data mutations, use `router.push()` not `router.refresh()` to avoid hangs |
+| `h-14 mobile header` | Fixed mobile headers are 56px (`h-14`), requiring 3.5rem (`pt-14`) main padding |
 
 ---
 
@@ -45,9 +46,9 @@
 
 | Area | Status |
 |---|---|
-| Auth + dashboard shell | ✅ Done |
+| Auth + dashboard shell | ✅ Done (Responsive) |
 | Client / Project CRUD | ✅ Done |
-| Time entries + calendar view | 🔄 In progress (drag-to-create, bidirectional sync) |
-| CMS / website content | 🔄 In progress (modular rich-text editor, image pipeline) |
+| Time entries + calendar view | ✅ Done (Mobile optimized) |
+| CMS / website content | 🔄 In progress |
 | Financial management | ⏳ Not started |
-| Public showcase | 🔄 In progress |
+| Public showcase | ✅ Done (Basic responsive) |

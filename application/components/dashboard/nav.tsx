@@ -60,6 +60,7 @@ const settingsItems = [
   { label: "Product Tiers", href: "/app/settings/product-tiers" },
   { label: "Website", href: "/app/settings/website" },
   { label: "Integrations", href: "/app/settings/integrations" },
+  { label: "Team", href: "/app/settings/team" },
 ];
 
 function NavContent({

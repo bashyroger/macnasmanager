@@ -11,11 +11,11 @@ export async function logAction(
     const { data: { user } } = await supabase.auth.getUser();
     
     const { error } = await supabase.from("audit_logs").insert({
-      user_id: user?.id,
+      actor_user_id: user?.id || null,
       action,
       entity_type,
-      entity_id,
-      details
+      entity_id: entity_type !== "media" ? entity_id : undefined,
+      payload: { ...details, media_filename: entity_type === "media" ? entity_id : undefined }
     });
     
     if (error) {

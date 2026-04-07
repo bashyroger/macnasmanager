@@ -69,3 +69,28 @@ export async function processImage(buffer: Buffer, filename: string) {
     responsiveVersions: results
   };
 }
+
+/**
+ * Removes the original image and all its generated responsive versions.
+ */
+export async function deleteProcessedImage(filename: string) {
+  const pathsToDelete = [
+    path.join(BASE_MEDIA_PATH, "original", filename),
+    ...TARGET_WIDTHS.flatMap(width => [
+      path.join(BASE_MEDIA_PATH, String(width), filename),
+      path.join(BASE_MEDIA_PATH, String(width), filename + ".webp")
+    ])
+  ];
+
+  for (const filePath of pathsToDelete) {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (err) {
+      console.error(`Error deleting file ${filePath}:`, err);
+    }
+  }
+
+  return { success: true };
+}

@@ -507,6 +507,14 @@ export function WebsitePageForm({ page }: Props) {
               </button>
             </div>
           </div>
+          
+          {/* Debugging block */}
+          {Object.keys(errors).length > 0 && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <h4 className="font-bold text-red-800 text-sm">Form Validations Errors</h4>
+              <pre className="text-xs text-red-600 mt-2">{JSON.stringify(errors, null, 2)}</pre>
+            </div>
+          )}
         </div>
       </form>
     </div>
